@@ -162,6 +162,9 @@ echo "=== 9. Setup Custom Aliases ==="
 if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
 cat << 'EOF' >> ~/.bashrc
 
+# Send current directory path to windows ( you can leverage windows split terminal without zelliJ )
+PROMPT_COMMAND=${PROMPT_COMMAND:+"$PROMPT_COMMAND; "}'printf "\\e]9;9;%s\\e\\\\" "$(wslpath -w "$PWD")"'
+
 # =========================
 # Dev Custom Aliases
 # =========================
