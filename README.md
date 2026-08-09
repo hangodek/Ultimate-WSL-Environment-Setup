@@ -182,44 +182,6 @@ echo "=========================================="
 echo " Setup Complete!"
 echo " Run 'newgrp docker' or restart your shell to activate Docker permissions."
 echo "=========================================="
-git clone [https://github.com/LazyVim/starter](https://github.com/LazyVim/starter) ~/.config/nvim
-rm -rf ~/.config/nvim/.git
-
-echo "=== 6. Install mise (Version Manager) ==="
-curl [https://mise.run](https://mise.run) | sh
-if ! grep -q 'mise activate bash' ~/.bashrc; then
-  echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
-fi
-eval "$($HOME/.local/bin/mise activate bash)"
-
-echo "=== 7. Install Node.js, Go, and Ruby via mise ==="
-mise use --global node@lts
-mise use --global go@latest
-mise use --global ruby@latest
-
-echo "=== 8. Install Ruby on Rails ==="
-eval "$($HOME/.local/bin/mise env)"
-gem install rails
-
-echo "=== 9. Setup Custom Aliases ==="
-if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
-cat << 'EOF' >> ~/.bashrc
-
-# =========================
-# Dev Custom Aliases
-# =========================
-# Editor & Frameworks
-alias n="nvim"
-alias r="rails"
-
-# Database On-Demand (WSL RAM Saver)
-alias db-pg="docker compose -f ~/.config/dev-services/docker-compose.yml --profile pg --profile redis up -d"
-alias db-mysql="docker compose -f ~/.config/dev-services/docker-compose.yml --profile mysql --profile redis up -d"
-alias db-all="docker compose -f ~/.config/dev-services/docker-compose.yml --profile all up -d"
-alias db-stop="docker compose -f ~/.config/dev-services/docker-compose.yml --profile '*' down"
-alias db-status="docker ps"
-EOF
-fi
 
 echo "=========================================="
 echo " Setup Complete!"
