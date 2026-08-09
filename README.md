@@ -36,19 +36,28 @@ sudo apt update && sudo apt install -y \
   curl git ripgrep fd-find unzip tar dirmngr gpg gawk \
   xclip xsel ca-certificates lsb-release
 
-echo "=== 2. Install Docker & Docker Compose ==="
-sudo apt remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
+echo "=== 2. Install Docker & Docker Compose (Official Docker Repo) ==="
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL [https://download.docker.com/linux/ubuntu/gpg](https://download.docker.com/linux/ubuntu/gpg) -o /etc/apt/keyrings/docker.asc
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] [https://download.docker.com/linux/ubuntu](https://download.docker.com/linux/ubuntu) \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
 
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl start docker || true
+sudo groupadd docker 2>/dev/null || true
 sudo usermod -aG docker $USER
 
 echo "=== 3. Setup Docker Containers (PostgreSQL, MySQL, Redis) ==="
@@ -107,6 +116,49 @@ mv ~/.local/share/nvim ~/.local/share/nvim.bak 2>/dev/null || true
 mv ~/.local/state/nvim ~/.local/state/nvim.bak 2>/dev/null || true
 mv ~/.cache/nvim ~/.cache/nvim.bak 2>/dev/null || true
 
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+
+echo "=== 6. Install mise (Version Manager) ==="
+curl https://mise.run | sh
+if ! grep -q 'mise activate bash' ~/.bashrc; then
+  echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+fi
+eval "$($HOME/.local/bin/mise activate bash)"
+
+echo "=== 7. Install Node.js, Go, and Ruby via mise ==="
+mise use --global node@lts
+mise use --global go@latest
+mise use --global ruby@latest
+
+echo "=== 8. Install Ruby on Rails ==="
+eval "$($HOME/.local/bin/mise env)"
+gem install rails
+
+echo "=== 9. Setup Custom Aliases ==="
+if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
+cat << 'EOF' >> ~/.bashrc
+
+# =========================
+# Dev Custom Aliases
+# =========================
+# Editor & Frameworks
+alias n="nvim"
+alias r="rails"
+
+# Database On-Demand (WSL RAM Saver)
+alias db-pg="docker compose -f ~/.config/dev-services/docker-compose.yml --profile pg --profile redis up -d"
+alias db-mysql="docker compose -f ~/.config/dev-services/docker-compose.yml --profile mysql --profile redis up -d"
+alias db-all="docker compose -f ~/.config/dev-services/docker-compose.yml --profile all up -d"
+alias db-stop="docker compose -f ~/.config/dev-services/docker-compose.yml down"
+alias db-status="docker ps"
+EOF
+fi
+
+echo "=========================================="
+echo " Setup Complete!"
+echo " Run 'newgrp docker' or restart your shell to activate Docker permissions."
+echo "=========================================="
 git clone [https://github.com/LazyVim/starter](https://github.com/LazyVim/starter) ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
