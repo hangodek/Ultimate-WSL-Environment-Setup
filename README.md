@@ -17,6 +17,29 @@ This setup is heavily inspired by **Omakub** (by DHH) for its comprehensive depe
 6. **Languages & Frameworks**: Node.js (LTS), Go (Latest), Ruby (Latest), and Ruby on Rails.
 7. **Custom Aliases**: Smart terminal shortcuts to supercharge your productivity.
 
+## 🛠️ Custom Terminal Aliases
+
+### 1. Editor & Frameworks
+
+| Alias | Command | Description | Usage Examples |
+| :--- | :--- | :--- | :--- |
+| **`n`** | `nvim` | Shortcut to open the Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
+| **`r`** | `rails` | Shortcut for Ruby on Rails CLI commands. | • `r s` *(run server)*<br>• `r c` *(open console)*<br>• `r g migration CreateUsers` |
+
+---
+
+### 2. Database On-Demand (WSL RAM Saver)
+
+Using Docker Compose profiles ensures database containers only run when explicitly activated, preventing idle memory consumption in WSL 2.
+
+| Alias | Command / Action | Description & Advantages |
+| :--- | :--- | :--- |
+| **`db-pg`** | Starts PostgreSQL & Redis | Runs PostgreSQL and Redis in the background (`-d`). Saves RAM by keeping MySQL inactive. |
+| **`db-mysql`** | Starts MySQL & Redis | Runs MySQL and Redis in the background (`-d`). Saves RAM by keeping PostgreSQL inactive. |
+| **`db-all`** | Starts all services | Launches PostgreSQL, MySQL, and Redis simultaneously using the `--profile all` flag. |
+| **`db-stop`** | Stops all containers | Brings down (`docker compose down`) all running services. Uses `--profile '*'` to ensure all active profiled containers are stopped. |
+| **`db-status`** | `docker ps` | Shortcut to view active containers, assigned ports, and health status. |
+
 ---
 
 ## 📜 Installation
@@ -193,7 +216,7 @@ alias r="rails"
 alias db-pg="docker compose -f ~/.config/dev-services/docker-compose.yml --profile pg --profile redis up -d"
 alias db-mysql="docker compose -f ~/.config/dev-services/docker-compose.yml --profile mysql --profile redis up -d"
 alias db-all="docker compose -f ~/.config/dev-services/docker-compose.yml --profile all up -d"
-alias db-stop="docker compose -f ~/.config/dev-services/docker-compose.yml down"
+alias db-stop="docker compose -f ~/.config/dev-services/docker-compose.yml --profile '*' down"
 alias db-status="docker ps"
 EOF
 fi
