@@ -189,8 +189,85 @@ fi
 EOF
 fi
 
+echo "=== 12. Install Antigravity CLI (agy) & Alias ==="
+if ! command -v agy &>/dev/null; then
+  curl -fsSL https://antigravity.google/cli/install.sh | bash || echo "Antigravity installer finished."
+else
+  echo "Antigravity CLI is already installed."
+fi
+
+if ! grep -q 'Antigravity Alias' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Antigravity Alias
+# =========================
+alias agyd='agy --dangerously-skip-permissions'
+EOF
+fi
+
+echo "=== 13. Install OpenCode CLI ==="
+if ! command -v opencode &>/dev/null; then
+  curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
+else
+  echo "OpenCode CLI is already installed."
+fi
+
+echo "=== 14. Install 9router AI Gateway ==="
+eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
+if ! command -v 9router &>/dev/null; then
+  npm install -g 9router || echo "npm install 9router finished."
+else
+  echo "9router is already installed."
+fi
+
+echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
+if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
+  cat <<'EOF' >>~/.inputrc
+
+# ==========================================================
+# Case-Insensitive Tab Completion
+# ==========================================================
+$include /etc/inputrc
+set completion-ignore-case on
+set completion-map-case on
+EOF
+fi
+
+echo "=== 16. Configure Neovim / LazyVim Optimizations ==="
+OPTIONS_FILE=~/.config/nvim/lua/config/options.lua
+if [ -f "$OPTIONS_FILE" ] && ! grep -q 'snacks_animate' "$OPTIONS_FILE"; then
+  echo '' >>"$OPTIONS_FILE"
+  echo '-- Disable animations' >>"$OPTIONS_FILE"
+  echo 'vim.g.snacks_animate = false' >>"$OPTIONS_FILE"
+fi
+
+SNACKS_PLUGIN=~/.config/nvim/lua/plugins/snacks.lua
+if [ ! -f "$SNACKS_PLUGIN" ]; then
+  mkdir -p ~/.config/nvim/lua/plugins
+  cat <<'EOF' >"$SNACKS_PLUGIN"
+return {
+  {
+    "folke/snacks.nvim",
+    opts = {
+      picker = {
+        sources = {
+          explorer = {
+            layout = {
+              auto_hide = { "input" },
+            },
+          },
+        },
+      },
+    },
+  },
+}
+EOF
+fi
+
 echo "=========================================="
 echo " 🎉 Setup Complete!"
 echo " IMPORTANT: Please CLOSE this terminal and REOPEN it (via Alacritty) to start your new environment."
 echo "=========================================="
+
 

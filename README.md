@@ -77,10 +77,12 @@ chmod +x setup.sh
 > 1. Installs build tools, Rust/C/C++ compilers, image/PDF processing libs, and clipboard sync.
 > 2. Installs official **Docker CE** & **Docker Compose**.
 > 3. Configures **On-Demand DB Services** (Postgres 16, MySQL 8.4, Redis 7).
-> 4. Installs latest **Neovim (v0.10+)** & initializes **LazyVim**.
+> 4. Installs latest **Neovim (v0.10+)** & initializes **LazyVim** (no animation lag, clean picker).
 > 5. Installs **mise** and provisions **Node.js (LTS)**, **Go (latest)**, **Ruby (latest)**, and **Rails**.
 > 6. Installs **Zellij** multiplexer and configures auto-start on interactive login.
-> 7. Configures custom aliases for database and editor workflows.
+> 7. Installs **Antigravity CLI (`agy`)**, **OpenCode**, and **9router** AI gateway.
+> 8. Enables **case-insensitive tab completion** in Bash (e.g. type `w` + Tab to complete `Windows`).
+> 9. Configures custom aliases for database, editor, and AI assistant workflows.
 
 ---
 
@@ -91,7 +93,10 @@ chmod +x setup.sh
 | **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host. |
 | **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows, and status bar. |
 | **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
-| **Editor** | **Neovim + LazyVim** | Modern IDE experience with LSP, treesitter, fuzzy find, and file tree. |
+| **Editor** | **Neovim + LazyVim** | Modern IDE experience (animations disabled, clean topbar, full LSP). |
+| **AI Assistants** | **Antigravity / OpenCode** | Built-in CLI coding assistants with shortcuts (`agyd`, `opencode`). |
+| **AI Gateway** | **9router** | Local proxy for fallback routing and token compression. |
+| **Shell Experience**| **Readline / Bash** | Smart case-insensitive tab completion (`set completion-ignore-case on`). |
 | **Version Manager**| **mise** | Blazing-fast runtime manager for Node.js, Go, Ruby, Python, and more. |
 | **Containers** | **Docker Engine** | Official Docker CE daemon & Compose plugin. |
 | **Databases** | **Docker Profiles** | Instant PostgreSQL 16, MySQL 8.4, and Redis 7 on `127.0.0.1` without passwords. |
@@ -124,11 +129,12 @@ chmod +x setup.sh
 
 ## 🛠️ Custom Terminal Aliases
 
-### 1. Editor & Frameworks
+### 1. Editor, AI & Frameworks
 
 | Alias | Command | Description | Usage Examples |
 | :--- | :--- | :--- | :--- |
 | **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
+| **`agyd`** | `agy --dangerously-skip-permissions` | Launch Antigravity assistant in trusted/yolo mode. | • `agyd` |
 | **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s` *(run server)*<br>• `r c` *(open console)*<br>• `r g migration CreateUsers` |
 
 ---
@@ -339,6 +345,82 @@ if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
 if command -v zellij &>/dev/null && [ -z "$ZELLIJ" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -t 1 ]; then
     exec zellij
 fi
+EOF
+fi
+
+echo "=== 12. Install Antigravity CLI (agy) & Alias ==="
+if ! command -v agy &>/dev/null; then
+  curl -fsSL https://antigravity.google/cli/install.sh | bash || echo "Antigravity installer finished."
+else
+  echo "Antigravity CLI is already installed."
+fi
+
+if ! grep -q 'Antigravity Alias' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Antigravity Alias
+# =========================
+alias agyd='agy --dangerously-skip-permissions'
+EOF
+fi
+
+echo "=== 13. Install OpenCode CLI ==="
+if ! command -v opencode &>/dev/null; then
+  curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
+else
+  echo "OpenCode CLI is already installed."
+fi
+
+echo "=== 14. Install 9router AI Gateway ==="
+eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
+if ! command -v 9router &>/dev/null; then
+  npm install -g 9router || echo "npm install 9router finished."
+else
+  echo "9router is already installed."
+fi
+
+echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
+if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
+  cat <<'EOF' >>~/.inputrc
+
+# ==========================================================
+# Case-Insensitive Tab Completion
+# ==========================================================
+$include /etc/inputrc
+set completion-ignore-case on
+set completion-map-case on
+EOF
+fi
+
+echo "=== 16. Configure Neovim / LazyVim Optimizations ==="
+OPTIONS_FILE=~/.config/nvim/lua/config/options.lua
+if [ -f "$OPTIONS_FILE" ] && ! grep -q 'snacks_animate' "$OPTIONS_FILE"; then
+  echo '' >>"$OPTIONS_FILE"
+  echo '-- Disable animations' >>"$OPTIONS_FILE"
+  echo 'vim.g.snacks_animate = false' >>"$OPTIONS_FILE"
+fi
+
+SNACKS_PLUGIN=~/.config/nvim/lua/plugins/snacks.lua
+if [ ! -f "$SNACKS_PLUGIN" ]; then
+  mkdir -p ~/.config/nvim/lua/plugins
+  cat <<'EOF' >"$SNACKS_PLUGIN"
+return {
+  {
+    "folke/snacks.nvim",
+    opts = {
+      picker = {
+        sources = {
+          explorer = {
+            layout = {
+              auto_hide = { "input" },
+            },
+          },
+        },
+      },
+    },
+  },
+}
 EOF
 fi
 
