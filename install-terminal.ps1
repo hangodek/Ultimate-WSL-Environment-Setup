@@ -132,7 +132,7 @@ dynamic_title   = true
 # Typography & Fonts
 # ------------------------------------------------------------------------------
 [font]
-size = 12.5
+size = 11
 builtin_box_drawing = true
 
 [font.normal]
