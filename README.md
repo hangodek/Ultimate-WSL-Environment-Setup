@@ -1,21 +1,119 @@
 # 🚀 Ultimate WSL Development Environment
 
-An automated script to set up a modern, lightweight, and powerful development environment in **Windows Subsystem for Linux (WSL)** (Ubuntu/Debian-based). 
+An automated, two-part setup to give you a **99% bare-metal Linux experience** inside Windows Subsystem for Linux (WSL 2) with zero lag, GPU-accelerated rendering, and a gorgeous unified **Tokyo Night** aesthetic.
 
-This setup is heavily inspired by **Omakub** (by DHH) for its comprehensive dependencies and database management approach, but it is specifically optimized for WSL users to **minimize RAM usage** and maintain seamless Windows compatibility (e.g., clipboard synchronization).
+Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
+- **GPU-Accelerated Window**: Replaces sluggish Windows Terminal with **Alacritty**.
+- **Modern Multiplexer**: Pre-configured **Zellij** for tabs, panes, floating terminals, and session persistence.
+- **Unified Tokyo Night Theme**: Seamless colors across Alacritty, Zellij, Neovim (LazyVim), and CLI tools.
+- **RAM-Efficient Databases**: On-demand Docker containers that consume zero idle memory.
+- **True Clipboard Sync**: Native copy/paste across Windows and Linux via `xclip` / `xsel` and Alacritty bindings.
+
+---
+
+## 🏛️ Architecture
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Windows 11 / 10 Host                                  │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  Alacritty Terminal (GPU-Accelerated)            │  │
+│  │  • JetBrainsMono Nerd Font                       │  │
+│  │  • Tokyo Night Dark Color Scheme                 │  │
+│  │  • Directly launches `wsl.exe --cd ~`            │  │
+│  └────────────────────────┬─────────────────────────┘  │
+└───────────────────────────┼────────────────────────────┘
+                            │ (Zero Latency)
+┌───────────────────────────▼────────────────────────────┐
+│  WSL 2 (Ubuntu / Debian)                               │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  Zellij Workspace Multiplexer (Auto-starts)       │  │
+│  │  ┌─────────────────────┐  ┌────────────────────┐ │  │
+│  │  │ Tab 1: Editor       │  │ Tab 2: Servers     │ │  │
+│  │  │ Neovim (LazyVim)    │  │ Rails / Go / Node  │ │  │
+│  │  └─────────────────────┘  └────────────────────┘ │  │
+│  └──────────────────────────────────────────────────┘  │
+│  • mise (Node, Go, Ruby, Rails)                        │
+│  • Docker On-Demand DBs (PostgreSQL, MySQL, Redis)     │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚡ Quick Start (2-Step Installation)
+
+### Step 1: Run Terminal Installer on Windows (PowerShell)
+
+Open **PowerShell** on Windows and run:
+
+```powershell
+# From the repository directory:
+.\install-terminal.ps1
+```
+
+> **What this does:**
+> 1. Installs **Alacritty** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
+> 2. Auto-generates `%APPDATA%\alacritty\alacritty.toml` configured with Tokyo Night colors, Nerd Font glyphs, and auto-launching into WSL `~`.
+
+---
+
+### Step 2: Run Environment Setup inside WSL (Linux)
+
+Launch your new **Alacritty** terminal (or open your WSL shell) and run:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+> **What this does:**
+> 1. Installs build tools, Rust/C/C++ compilers, image/PDF processing libs, and clipboard sync.
+> 2. Installs official **Docker CE** & **Docker Compose**.
+> 3. Configures **On-Demand DB Services** (Postgres 16, MySQL 8.4, Redis 7).
+> 4. Installs latest **Neovim (v0.10+)** & initializes **LazyVim**.
+> 5. Installs **mise** and provisions **Node.js (LTS)**, **Go (latest)**, **Ruby (latest)**, and **Rails**.
+> 6. Installs **Zellij** multiplexer and configures auto-start on interactive login.
+> 7. Configures custom aliases for database and editor workflows.
+
+---
 
 ## ✨ Features & Stack
 
-1. **System Core (Omakub + WSL)**: Essential build tools, Rust/C/C++ compilers, image/PDF processing (for Rails Active Storage), database CLI clients (`psql`, `mysql`, `redis-cli`), and Windows clipboard sync (`xclip`, `xsel`).
-2. **Docker & Docker Compose**: Official container engine for running local services without cluttering your OS.
-3. **On-Demand Databases (Docker Profiles)**: 
-   - Uses **Non-Alpine (Standard)** images for 100% production compatibility.
-   - **Zero-Config & Secure**: Bound to `127.0.0.1` without passwords (safe for local development).
-   - **RAM Efficient**: Databases only spin up when explicitly called; they do not run continuously in the background.
-4. **Neovim & LazyVim**: Modern text editor (v0.10+) pre-configured as a fully-featured IDE via LazyVim.
-5. **mise**: Multi-language version manager (a faster replacement for NVM, Rbenv, ASDF).
-6. **Languages & Frameworks**: Node.js (LTS), Go (Latest), Ruby (Latest), and Ruby on Rails.
-7. **Custom Aliases**: Smart terminal shortcuts to supercharge your productivity.
+| Component | Tool | Description |
+| :--- | :--- | :--- |
+| **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host. |
+| **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows, and status bar. |
+| **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
+| **Editor** | **Neovim + LazyVim** | Modern IDE experience with LSP, treesitter, fuzzy find, and file tree. |
+| **Version Manager**| **mise** | Blazing-fast runtime manager for Node.js, Go, Ruby, Python, and more. |
+| **Containers** | **Docker Engine** | Official Docker CE daemon & Compose plugin. |
+| **Databases** | **Docker Profiles** | Instant PostgreSQL 16, MySQL 8.4, and Redis 7 on `127.0.0.1` without passwords. |
+| **Theme** | **Tokyo Night** | Unified aesthetic across terminal, multiplexer, and editor. |
+
+---
+
+## ⌨️ Shortcuts & Cheatsheet
+
+### Alacritty (Windows Host)
+| Shortcut | Action |
+| :--- | :--- |
+| `Ctrl + Shift + C` | Copy selected text |
+| `Ctrl + Shift + V` | Paste from clipboard |
+| `Ctrl + Plus (+)` | Increase font size |
+| `Ctrl + Minus (-)` | Decrease font size |
+| `Ctrl + 0` | Reset font size |
+
+### Zellij (WSL Multiplexer)
+| Shortcut | Action | Description |
+| :--- | :--- | :--- |
+| `Ctrl + p` | **Pane mode** | Press `n` for new pane, `x` to close, `f` to fullscreen |
+| `Ctrl + t` | **Tab mode** | Press `n` for new tab, `x` to close, `[` / `]` to switch tabs |
+| `Ctrl + s` | **Scroll mode** | Search text (`/`), scroll history with `j`/`k` or mouse wheel |
+| `Ctrl + o` | **Session mode** | Press `d` to detach session, `w` to switch session |
+| `Alt + n` | **Quick Pane** | Open a new pane directly |
+| `Alt + [` / `Alt + ]` | **Quick Tab** | Cycle through open tabs |
+
+---
 
 ## 🛠️ Custom Terminal Aliases
 
@@ -23,28 +121,28 @@ This setup is heavily inspired by **Omakub** (by DHH) for its comprehensive depe
 
 | Alias | Command | Description | Usage Examples |
 | :--- | :--- | :--- | :--- |
-| **`n`** | `nvim` | Shortcut to open the Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
-| **`r`** | `rails` | Shortcut for Ruby on Rails CLI commands. | • `r s` *(run server)*<br>• `r c` *(open console)*<br>• `r g migration CreateUsers` |
+| **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
+| **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s` *(run server)*<br>• `r c` *(open console)*<br>• `r g migration CreateUsers` |
 
 ---
 
 ### 2. Database On-Demand (WSL RAM Saver)
 
-Using Docker Compose profiles ensures database containers only run when explicitly activated, preventing idle memory consumption in WSL 2.
+Databases are managed through Docker Compose profiles. They only consume memory when running.
 
 | Alias | Command / Action | Description & Advantages |
 | :--- | :--- | :--- |
-| **`db-pg`** | Starts PostgreSQL & Redis | Runs PostgreSQL and Redis in the background (`-d`). Saves RAM by keeping MySQL inactive. |
-| **`db-mysql`** | Starts MySQL & Redis | Runs MySQL and Redis in the background (`-d`). Saves RAM by keeping PostgreSQL inactive. |
-| **`db-all`** | Starts all services | Launches PostgreSQL, MySQL, and Redis simultaneously using the `--profile all` flag. |
-| **`db-stop`** | Stops all containers | Brings down (`docker compose down`) all running services. Uses `--profile '*'` to ensure all active profiled containers are stopped. |
-| **`db-status`** | `docker ps` | Shortcut to view active containers, assigned ports, and health status. |
+| **`db-pg`** | Starts PostgreSQL & Redis | Runs PostgreSQL 16 and Redis 7 in background (`-d`). |
+| **`db-mysql`** | Starts MySQL & Redis | Runs MySQL 8.4 and Redis 7 in background (`-d`). |
+| **`db-all`** | Starts all services | Launches PostgreSQL, MySQL, and Redis simultaneously. |
+| **`db-stop`** | Stops all containers | Shuts down all active database containers to free RAM. |
+| **`db-status`** | `docker ps` | View active database containers, ports, and health status. |
 
 ---
 
-## 📜 Installation
+## 📜 Manual Script Execution
 
-Create a file named `setup.sh` in your WSL home directory and paste the following script. Or you can clone this project > give permissions to `setup.sh` > ./setup.sh
+If you prefer to inspect or run commands manually, here is the full `setup.sh` reference:
 
 ```bash
 #!/bin/bash
@@ -60,14 +158,12 @@ sudo apt update && sudo apt install -y \
   xclip xsel ca-certificates lsb-release
 
 echo "=== 2. Install Docker & Docker Compose (Official Docker Repo) ==="
-# Add Docker's official GPG key:
 sudo apt update
 sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Add the repository to Apt sources:
 sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
@@ -86,7 +182,7 @@ sudo usermod -aG docker $USER
 echo "=== 3. Setup Docker Containers (PostgreSQL, MySQL, Redis) ==="
 mkdir -p ~/.config/dev-services
 
-cat << 'EOF' > ~/.config/dev-services/docker-compose.yml
+cat <<'EOF' >~/.config/dev-services/docker-compose.yml
 services:
   postgres:
     image: postgres:16
@@ -145,7 +241,7 @@ rm -rf ~/.config/nvim/.git
 echo "=== 6. Install mise (Version Manager) ==="
 curl https://mise.run | sh
 if ! grep -q 'mise activate bash' ~/.bashrc; then
-  echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+  echo 'eval "$(~/.local/bin/mise activate bash)"' >>~/.bashrc
 fi
 eval "$($HOME/.local/bin/mise activate bash)"
 
@@ -160,7 +256,7 @@ gem install rails
 
 echo "=== 9. Setup Custom Aliases ==="
 if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
-cat << 'EOF' >> ~/.bashrc
+  cat <<'EOF' >>~/.bashrc
 
 # Send current directory path to windows ( you can leverage windows split terminal without zelliJ )
 PROMPT_COMMAND=${PROMPT_COMMAND:+"$PROMPT_COMMAND; "}'printf "\\e]9;9;%s\\e\\\\" "$(wslpath -w "$PWD")"'
@@ -181,12 +277,62 @@ alias db-status="docker ps"
 EOF
 fi
 
-echo "=========================================="
-echo " Setup Complete!"
-echo " Run 'newgrp docker' or restart your shell to activate Docker permissions."
-echo "=========================================="
+echo "=== 10. Install Zellij (Terminal Multiplexer) ==="
+if ! command -v zellij &>/dev/null; then
+  echo "Fetching latest Zellij release for Linux..."
+  ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
+  if [ -z "$ZELLIJ_VERSION" ]; then
+    ZELLIJ_VERSION="v0.41.2"
+  fi
+  echo "Downloading Zellij ($ZELLIJ_VERSION)..."
+  curl -Lo /tmp/zellij.tar.gz "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz"
+  tar -xf /tmp/zellij.tar.gz -C /tmp/
+  chmod +x /tmp/zellij
+  sudo mv /tmp/zellij /usr/local/bin/zellij
+  rm -f /tmp/zellij.tar.gz
+  echo "Zellij installed successfully."
+else
+  echo "Zellij is already installed ($(zellij --version))."
+fi
+
+mkdir -p ~/.config/zellij
+if [ ! -f ~/.config/zellij/config.kdl ]; then
+  cat <<'EOF' >~/.config/zellij/config.kdl
+// ==========================================================
+// Zellij Configuration — WSL Development Environment
+// ==========================================================
+theme "tokyo-night-dark"
+default_shell "bash"
+pane_frames false
+mouse_mode true
+copy_on_select true
+simplified_ui false
+
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name false
+    }
+}
+EOF
+fi
+
+echo "=== 11. Configure Zellij Auto-Start in .bashrc ==="
+if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Zellij Auto-Start
+# =========================
+# Automatically start Zellij in interactive sessions (outside nested Zellij/TMUX/VSCode)
+if command -v zellij &>/dev/null && [ -z "$ZELLIJ" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -t 1 ]; then
+    exec zellij
+fi
+EOF
+fi
 
 echo "=========================================="
-echo " Setup Complete!"
-echo " IMPORTANT: Please CLOSE this terminal and REOPEN it to apply Docker group permissions."
+echo " 🎉 Setup Complete!"
+echo " IMPORTANT: Please CLOSE this terminal and REOPEN it (via Alacritty) to start your new environment."
 echo "=========================================="
+```

@@ -129,12 +129,64 @@ alias db-status="docker ps"
 EOF
 fi
 
-echo "=========================================="
-echo " Setup Complete!"
-echo " Run 'newgrp docker' or restart your shell to activate Docker permissions."
-echo "=========================================="
+echo "=== 10. Install Zellij (Terminal Multiplexer) ==="
+if ! command -v zellij &>/dev/null; then
+  echo "Fetching latest Zellij release for Linux..."
+  ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
+  if [ -z "$ZELLIJ_VERSION" ]; then
+    # Fallback release if GitHub API rate-limited
+    ZELLIJ_VERSION="v0.41.2"
+  fi
+  echo "Downloading Zellij ($ZELLIJ_VERSION)..."
+  curl -Lo /tmp/zellij.tar.gz "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz"
+  tar -xf /tmp/zellij.tar.gz -C /tmp/
+  chmod +x /tmp/zellij
+  sudo mv /tmp/zellij /usr/local/bin/zellij
+  rm -f /tmp/zellij.tar.gz
+  echo "Zellij installed successfully."
+else
+  echo "Zellij is already installed ($(zellij --version))."
+fi
+
+# Configure Zellij
+mkdir -p ~/.config/zellij
+if [ ! -f ~/.config/zellij/config.kdl ]; then
+  cat <<'EOF' >~/.config/zellij/config.kdl
+// ==========================================================
+// Zellij Configuration — WSL Development Environment
+// ==========================================================
+theme "tokyo-night-dark"
+default_shell "bash"
+pane_frames false
+mouse_mode true
+copy_on_select true
+simplified_ui false
+
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name false
+    }
+}
+EOF
+fi
+
+echo "=== 11. Configure Zellij Auto-Start in .bashrc ==="
+if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Zellij Auto-Start
+# =========================
+# Automatically start Zellij in interactive sessions (outside nested Zellij/TMUX/VSCode)
+if command -v zellij &>/dev/null && [ -z "$ZELLIJ" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -t 1 ]; then
+    exec zellij
+fi
+EOF
+fi
 
 echo "=========================================="
-echo " Setup Complete!"
-echo " IMPORTANT: Please CLOSE this terminal and REOPEN it to apply Docker group permissions."
+echo " 🎉 Setup Complete!"
+echo " IMPORTANT: Please CLOSE this terminal and REOPEN it (via Alacritty) to start your new environment."
 echo "=========================================="
+
