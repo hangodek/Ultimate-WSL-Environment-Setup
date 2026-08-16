@@ -82,8 +82,14 @@ powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 
 ### Step 2: Run Environment Setup inside WSL (Linux)
 
-Launch your new **Alacritty** terminal (or open your WSL shell) and run:
+Launch your new **Alacritty** terminal (or open any WSL shell) and choose either method:
 
+#### Method A: Single Linux One-Liner (No repo cloning needed)
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/setup.sh)"
+```
+
+#### Method B: Manual Run (If already cloned)
 ```bash
 chmod +x setup.sh
 ./setup.sh
