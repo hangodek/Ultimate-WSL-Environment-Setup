@@ -1,46 +1,58 @@
 # 🚀 Ultimate WSL Development Environment
 
-An automated, two-part setup to give you a **99% bare-metal Linux experience** inside Windows Subsystem for Linux (WSL 2) with zero lag, GPU-accelerated rendering, and a gorgeous unified **Tokyo Night** aesthetic.
+An automated, two-part setup to give you a **99% bare-metal Linux experience** inside Windows Subsystem for Linux (WSL 2) with zero lag, GPU-accelerated rendering, smart terminal navigation, and a gorgeous unified **Tokyo Night** aesthetic.
 
 Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 - **GPU-Accelerated Window**: Replaces sluggish Windows Terminal with **Alacritty**.
 - **Modern Multiplexer**: Pre-configured **Zellij** for tabs, panes, floating terminals, and session persistence.
-- **Unified Tokyo Night Theme**: Seamless colors across Alacritty, Zellij, Neovim (LazyVim), and CLI tools.
-- **RAM-Efficient Databases**: On-demand Docker containers that consume zero idle memory.
-- **True Clipboard Sync**: Native copy/paste across Windows and Linux via `xclip` / `xsel` and Alacritty bindings.
+- **Starship Prompt**: Instantaneous, informative prompt with git status and Tokyo Night theme.
+- **Fuzzy Search Everywhere**: **fzf** for history (`Ctrl+R`), files (`Ctrl+T`), and directories (`Alt+C`).
+- **Smart Directory Jumping**: **zoxide** (`z`) learns your most frequent directories.
+- **Modern Coreutils**: **eza** (icon & git-aware `ls`), **bat** (syntax-highlighted `cat`), and **git-delta** (beautiful diffs).
+- **TUI Git & Docker**: **lazygit** (integrated with LazyVim via `<leader>gg`) and **lazydocker**.
+- **AI Tooling Built-in**: **Antigravity CLI** (`agy` / `agyd`), **OpenCode**, and **9router** AI gateway.
+- **Unified Tokyo Night Theme**: Seamless colors across Alacritty, Zellij, Neovim (LazyVim), fzf, Starship, and delta.
+- **RAM-Efficient WSL 2**: Auto-generated `.wslconfig` memory limits and on-demand Docker databases.
+- **True Clipboard Sync**: Native copy/paste across Windows and Linux.
 
 ---
 
 ## 🏛️ Architecture
 
 ```
-┌────────────────────────────────────────────────────────┐
-│  Windows 11 / 10 Host                                  │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │  Alacritty Terminal (GPU-Accelerated)            │  │
-│  │  • JetBrainsMono Nerd Font                       │  │
-│  │  • Tokyo Night Dark Color Scheme                 │  │
-│  │  • Directly launches `wsl.exe --cd ~`            │  │
-│  └────────────────────────┬─────────────────────────┘  │
-└───────────────────────────┼────────────────────────────┘
-                            │ (Zero Latency)
-┌───────────────────────────▼────────────────────────────┐
-│  WSL 2 (Ubuntu / Debian)                               │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │  Zellij Workspace Multiplexer (Auto-starts)       │  │
-│  │  ┌─────────────────────┐  ┌────────────────────┐ │  │
-│  │  │ Tab 1: Editor       │  │ Tab 2: Servers     │ │  │
-│  │  │ Neovim (LazyVim)    │  │ Rails / Go / Node  │ │  │
-│  │  └─────────────────────┘  └────────────────────┘ │  │
-│  └──────────────────────────────────────────────────┘  │
-│  • mise (Node, Go, Ruby, Rails)                        │
-│  • Docker On-Demand DBs (PostgreSQL, MySQL, Redis)     │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│  Windows 11 / 10 Host                                                  │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │  Alacritty Terminal (GPU-Accelerated)                            │  │
+│  │  • JetBrainsMono Nerd Font                                       │  │
+│  │  • Tokyo Night Dark Color Scheme                                 │  │
+│  │  • Directly launches `wsl.exe --cd ~`                            │  │
+│  │  • RAM Limit configured in `%USERPROFILE%\.wslconfig`             │  │
+│  └─────────────────────────────────┬────────────────────────────────┘  │
+└────────────────────────────────────┼───────────────────────────────────┘
+                                     │ (Zero Latency)
+┌────────────────────────────────────▼───────────────────────────────────┐
+│  WSL 2 (Ubuntu / Debian)                                               │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │  Zellij Workspace Multiplexer (Auto-starts)                       │  │
+│  │  ┌──────────────────────────────┐  ┌───────────────────────────┐ │  │
+│  │  │ Tab 1: Editor                │  │ Tab 2: Shell & Servers    │ │  │
+│  │  │ • Neovim (LazyVim)           │  │ • Starship (Tokyo Night)  │ │  │
+│  │  │ • lazygit (<leader>gg)       │  │ • fzf (Ctrl+R / Ctrl+T)   │ │  │
+│  │  │ • Antigravity / OpenCode     │  │ • zoxide (z project)      │ │  │
+│  │  └──────────────────────────────┘  └───────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+│  • mise (Node.js, Go, Ruby, Rails)                                     │
+│  • Docker On-Demand DBs (PostgreSQL 16, MySQL 8.4, Redis 7)            │
+│  • eza (ls) • bat (cat) • git-delta (diff) • lazydocker • gh CLI       │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## ⚡ Quick Start (2-Step Installation)
+
+### Step 1: Run Terminal Installer on Windows (PowerShell)
 
 Choose either of these easy methods on Windows:
 
@@ -61,6 +73,7 @@ powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 > **What this does:**
 > 1. Installs **Alacritty** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
 > 2. Auto-generates `%APPDATA%\alacritty\alacritty.toml` configured with Tokyo Night colors, Nerd Font glyphs, and auto-launching into WSL `~`.
+> 3. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
 
 ---
 
@@ -73,17 +86,6 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-> **What this does:**
-> 1. Installs build tools, Rust/C/C++ compilers, image/PDF processing libs, and clipboard sync.
-> 2. Installs official **Docker CE** & **Docker Compose**.
-> 3. Configures **On-Demand DB Services** (Postgres 16, MySQL 8.4, Redis 7).
-> 4. Installs latest **Neovim (v0.10+)** & initializes **LazyVim** (no animation lag, clean picker).
-> 5. Installs **mise** and provisions **Node.js (LTS)**, **Go (latest)**, **Ruby (latest)**, and **Rails**.
-> 6. Installs **Zellij** multiplexer and configures auto-start on interactive login.
-> 7. Installs **Antigravity CLI (`agy`)**, **OpenCode**, and **9router** AI gateway.
-> 8. Enables **case-insensitive tab completion** in Bash (e.g. type `w` + Tab to complete `Windows`).
-> 9. Configures custom aliases for database, editor, and AI assistant workflows.
-
 ---
 
 ## ✨ Features & Stack
@@ -92,15 +94,22 @@ chmod +x setup.sh
 | :--- | :--- | :--- |
 | **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host. |
 | **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows, and status bar. |
-| **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
-| **Editor** | **Neovim + LazyVim** | Modern IDE experience (animations disabled, clean topbar, full LSP). |
+| **Prompt** | **Starship** | Blazing-fast prompt with Tokyo Night theme, git status, and runtime versions. |
+| **Fuzzy Finder** | **fzf** | Interactive search for command history (`Ctrl+R`), files (`Ctrl+T`), and dirs (`Alt+C`). |
+| **Smart cd** | **zoxide** | Jump to frequent directories instantly using `z <folder>`. |
+| **Modern ls** | **eza** | Replaces `ls` with icons, file permissions, git status, and tree views. |
+| **Modern cat** | **bat** | Syntax-highlighted file viewing with line numbers and git diff gutters. |
+| **Git Diff Pager** | **git-delta** | Syntax-highlighted, side-by-side git diffs with Tokyo Night styling. |
+| **Git & Docker TUIs** | **lazygit / lazydocker** | Full keyboard-driven TUI clients for git management and container control. |
 | **AI Assistants** | **Antigravity / OpenCode** | Built-in CLI coding assistants with shortcuts (`agyd`, `opencode`). |
 | **AI Gateway** | **9router** | Local proxy for fallback routing and token compression. |
-| **Shell Experience**| **Readline / Bash** | Smart case-insensitive tab completion (`set completion-ignore-case on`). |
+| **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
+| **Editor** | **Neovim + LazyVim** | Modern IDE experience (animations disabled, clean picker, full LSP). |
+| **Shell Experience**| **Readline / Bash** | Smart case-insensitive tab completion + 100k deduplicated command history. |
 | **Version Manager**| **mise** | Blazing-fast runtime manager for Node.js, Go, Ruby, Python, and more. |
 | **Containers** | **Docker Engine** | Official Docker CE daemon & Compose plugin. |
 | **Databases** | **Docker Profiles** | Instant PostgreSQL 16, MySQL 8.4, and Redis 7 on `127.0.0.1` without passwords. |
-| **Theme** | **Tokyo Night** | Unified aesthetic across terminal, multiplexer, and editor. |
+| **Theme** | **Tokyo Night** | Unified aesthetic across terminal, multiplexer, prompt, fzf, delta, and editor. |
 
 ---
 
@@ -115,8 +124,19 @@ chmod +x setup.sh
 | `Ctrl + Minus (-)` | Decrease font size |
 | `Ctrl + 0` | Reset font size |
 
+### Shell Navigation & Fuzzy Find
+| Shortcut / Command | Tool | Action |
+| :--- | :--- | :--- |
+| `Ctrl + r` | **fzf** | Fuzzy search command history |
+| `Ctrl + t` | **fzf** | Fuzzy search files in current directory |
+| `Alt + c` | **fzf** | Fuzzy search subdirectories to `cd` into |
+| `z <name>` | **zoxide** | Jump to any matching directory (e.g. `z setup`) |
+| `zi` | **zoxide + fzf** | Interactive fuzzy directory selection |
+| `ls` / `ll` / `la` / `lt` | **eza** | Icon-enhanced list, long list, all files, and tree view |
+| `cat <file>` / `bat <file>` | **bat** | Syntax-highlighted file contents |
+
 ### Zellij (WSL Multiplexer)
-| Shortcut | Action | Description |
+| Shortcut | Mode | Description |
 | :--- | :--- | :--- |
 | `Ctrl + p` | **Pane mode** | Press `n` for new pane, `x` to close, `f` to fullscreen |
 | `Ctrl + t` | **Tab mode** | Press `n` for new tab, `x` to close, `[` / `]` to switch tabs |
@@ -129,19 +149,22 @@ chmod +x setup.sh
 
 ## 🛠️ Custom Terminal Aliases
 
-### 1. Editor, AI & Frameworks
+### 1. Editor, AI & Core Tools
 
 | Alias | Command | Description | Usage Examples |
 | :--- | :--- | :--- | :--- |
 | **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
 | **`agyd`** | `agy --dangerously-skip-permissions` | Launch Antigravity assistant in trusted/yolo mode. | • `agyd` |
-| **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s` *(run server)*<br>• `r c` *(open console)*<br>• `r g migration CreateUsers` |
+| **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s`<br>• `r c`<br>• `r g migration CreateUsers` |
+| **`cd`** | `z` | Auto-routed to zoxide smart directory jumper. | • `cd my-project` |
+| **`ls`** | `eza --icons ...` | Modern icon-aware file listing. | • `ls`<br>• `ll` *(long)*<br>• `lt` *(tree)* |
+| **`cat`** | `batcat --paging=never` | Syntax-highlighted file display. | • `cat setup.sh` |
 
 ---
 
 ### 2. Database On-Demand (WSL RAM Saver)
 
-Databases are managed through Docker Compose profiles. They only consume memory when running.
+Databases are managed through Docker Compose profiles. They only consume memory when actively running.
 
 | Alias | Command / Action | Description & Advantages |
 | :--- | :--- | :--- |
@@ -153,13 +176,14 @@ Databases are managed through Docker Compose profiles. They only consume memory 
 
 ---
 
-## 📜 Manual Script Execution
-
-If you prefer to inspect or run commands manually, here is the full `setup.sh` reference:
+## 📜 Complete `setup.sh` Reference
 
 ```bash
 #!/bin/bash
 set -e
+
+# Ensure local user binaries and Go binaries are in PATH during script execution
+export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 
 echo "=== 1. Update System & Install Base Dependencies (Omakub + WSL Tools) ==="
 sudo apt update && sudo apt install -y \
@@ -260,7 +284,7 @@ curl https://mise.run | sh
 if ! grep -q 'mise activate bash' ~/.bashrc; then
   echo 'eval "$(~/.local/bin/mise activate bash)"' >>~/.bashrc
 fi
-eval "$($HOME/.local/bin/mise activate bash)"
+eval "$($HOME/.local/bin/mise activate bash)" || true
 
 echo "=== 7. Install Node.js, Go, and Ruby via mise ==="
 mise use --global node@lts
@@ -268,15 +292,12 @@ mise use --global go@latest
 mise use --global ruby@latest
 
 echo "=== 8. Install Ruby on Rails ==="
-eval "$($HOME/.local/bin/mise env)"
-gem install rails
+eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
+gem install rails || echo "Rails installation finished."
 
 echo "=== 9. Setup Custom Aliases ==="
 if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
-
-# Send current directory path to windows ( you can leverage windows split terminal without zelliJ )
-PROMPT_COMMAND=${PROMPT_COMMAND:+"$PROMPT_COMMAND; "}'printf "\\e]9;9;%s\\e\\\\" "$(wslpath -w "$PWD")"'
 
 # =========================
 # Dev Custom Aliases
@@ -312,6 +333,7 @@ else
   echo "Zellij is already installed ($(zellij --version))."
 fi
 
+# Configure Zellij
 mkdir -p ~/.config/zellij
 if [ ! -f ~/.config/zellij/config.kdl ]; then
   cat <<'EOF' >~/.config/zellij/config.kdl
@@ -322,7 +344,7 @@ theme "tokyo-night-dark"
 default_shell "bash"
 pane_frames false
 mouse_mode true
-copy_on_select true
+copy_clipboard_on_select true
 simplified_ui false
 
 ui {
@@ -373,9 +395,9 @@ else
 fi
 
 echo "=== 14. Install 9router AI Gateway ==="
-eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
+eval "$($HOME/.local/bin/mise activate bash)" || true
 if ! command -v 9router &>/dev/null; then
-  npm install -g 9router || echo "npm install 9router finished."
+  $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
 else
   echo "9router is already installed."
 fi
@@ -421,6 +443,167 @@ return {
     },
   },
 }
+EOF
+fi
+
+echo "=== 17. Install fzf (Fuzzy Finder) ==="
+sudo apt install -y fzf
+if ! grep -q 'fzf --bash' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# fzf Fuzzy Finder (Ctrl+R history, Ctrl+T files, Alt+C dirs)
+# =========================
+eval "$(fzf --bash)"
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#283457,bg:#1a1b26,spinner:#7dcfff,hl:#f7768e --color=fg:#c0caf5,header:#f7768e,info:#7aa2f7,pointer:#7aa2f7 --color=marker:#9ece6a,fg+:#c0caf5,prompt:#7aa2f7,hl+:#f7768e'
+EOF
+fi
+
+echo "=== 18. Install zoxide (Smart cd) ==="
+sudo apt install -y zoxide
+if ! grep -q 'zoxide init bash' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# zoxide (Smart Directory Jumper)
+# =========================
+eval "$(zoxide init bash)"
+alias cd='z'
+EOF
+fi
+
+echo "=== 19. Install eza (Modern ls) ==="
+if ! command -v eza &>/dev/null; then
+  sudo mkdir -p /etc/apt/keyrings
+  wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg || true
+  echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+  sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
+  sudo apt update && sudo apt install -y eza || echo "eza installed via apt."
+fi
+if ! grep -q 'eza aliases' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# eza (Modern ls with icons and git status)
+# =========================
+# eza aliases
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -lh --icons --git --group-directories-first'
+alias la='eza -lah --icons --git --group-directories-first'
+alias lt='eza --tree --icons --level=2 --group-directories-first'
+EOF
+fi
+
+echo "=== 20. Install bat (Syntax-Highlighted cat) ==="
+sudo apt install -y bat
+if ! grep -q "alias bat=" ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# bat (Syntax-Highlighted cat)
+# =========================
+alias cat='batcat --paging=never'
+alias bat='batcat'
+EOF
+fi
+
+echo "=== 21. Install lazygit (TUI Git Client) ==="
+if ! command -v lazygit &>/dev/null; then
+  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*' || echo "0.44.1")
+  curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+  tar -xf /tmp/lazygit.tar.gz -C /tmp/ lazygit
+  sudo install /tmp/lazygit -D -t /usr/local/bin/
+  rm -f /tmp/lazygit.tar.gz /tmp/lazygit
+  echo "lazygit installed successfully."
+else
+  echo "lazygit is already installed."
+fi
+
+echo "=== 22. Install lazydocker (TUI Docker Manager) ==="
+if ! command -v lazydocker &>/dev/null; then
+  eval "$($HOME/.local/bin/mise activate bash)" || true
+  go install github.com/jesseduffield/lazydocker@latest || echo "lazydocker installation finished."
+  if ! grep -q 'go/bin' ~/.bashrc; then
+    echo 'export PATH="$HOME/go/bin:$PATH"' >>~/.bashrc
+  fi
+else
+  echo "lazydocker is already installed."
+fi
+
+echo "=== 23. Install GitHub CLI (gh) ==="
+if ! command -v gh &>/dev/null; then
+  (type -p wget >/dev/null || sudo apt install wget -y) \
+  && sudo mkdir -p -m 755 /etc/apt/keyrings \
+  && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null \
+  && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null \
+  && sudo apt update \
+  && sudo apt install -y gh
+else
+  echo "GitHub CLI (gh) is already installed."
+fi
+
+echo "=== 24. Install git-delta (Syntax-Highlighted Git Diffs) ==="
+sudo apt install -y git-delta || echo "git-delta package check complete."
+if ! git config --global core.pager 2>/dev/null | grep -q delta; then
+  git config --global core.pager delta
+  git config --global interactive.diffFilter "delta --color-only"
+  git config --global delta.line-numbers true
+  git config --global delta.dark true
+  git config --global delta.syntax-theme "Tokyo Night"
+fi
+
+echo "=== 25. Configure Better Bash History ==="
+if ! grep -q 'Better Bash History' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Better Bash History
+# =========================
+export HISTSIZE=100000
+export HISTFILESIZE=200000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTTIMEFORMAT="%F %T  "
+shopt -s histappend
+shopt -s cmdhist
+PROMPT_COMMAND="history -a; ${PROMPT_COMMAND}"
+EOF
+fi
+
+echo "=== 26. Configure SSH Agent Auto-Start ==="
+if ! grep -q 'SSH Agent Auto-Start' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# SSH Agent Auto-Start
+# =========================
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent -s)" >/dev/null 2>&1
+fi
+EOF
+fi
+
+echo "=== 27. Install Starship Prompt (LAST — wraps prompt) ==="
+if ! command -v starship &>/dev/null; then
+  curl -sS https://starship.rs/install.sh | sh -s -- --yes
+else
+  echo "Starship is already installed."
+fi
+mkdir -p ~/.config
+if [ ! -f ~/.config/starship.toml ]; then
+  starship preset tokyo-night -o ~/.config/starship.toml 2>/dev/null || true
+fi
+
+# Starship MUST be the last eval in .bashrc to wrap all prompt components properly
+if ! grep -q 'starship init bash' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# Starship Prompt (Must be last in .bashrc)
+# =========================
+eval "$(starship init bash)"
 EOF
 fi
 

@@ -216,6 +216,39 @@ bindings = [
 Set-Content -Path $alacrittyConfigFile -Value $alacrittyConfigContent -Encoding UTF8
 Write-Host "  ✓ Wrote configuration to $alacrittyConfigFile" -ForegroundColor Green
 
+# 5. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+Write-Host ""
+Write-Host "[5/5] Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
+$wslConfigFile = Join-Path -Path $env:USERPROFILE -ChildPath ".wslconfig"
+if (-not (Test-Path -Path $wslConfigFile)) {
+    $wslConfigContent = @'
+# ==============================================================================
+#  WSL 2 Configuration — Performance & RAM Management
+#  Place at: C:\Users\<YourUser>\.wslconfig
+# ==============================================================================
+[wsl2]
+# RAM limit: adjust based on your physical memory (e.g. 8GB on 16GB RAM machines)
+memory=8GB
+
+# Processors: limit to half or full physical core count
+processors=4
+
+# Swap partition size
+swap=2GB
+
+# Automatically return unused Linux memory back to Windows (prevents vmmem growth)
+autoMemoryReclaim=gradual
+
+[experimental]
+sparseVhd=true
+'@
+    Set-Content -Path $wslConfigFile -Value $wslConfigContent -Encoding UTF8
+    Write-Host "  ✓ Created .wslconfig template at $wslConfigFile" -ForegroundColor Green
+    Write-Host "    (Tip: edit memory= to match ~50-75% of your RAM, then run 'wsl --shutdown' in PowerShell)" -ForegroundColor DarkGray
+} else {
+    Write-Host "  ✓ Existing .wslconfig detected at $wslConfigFile (skipped)." -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
 Write-Host "  🎉 Windows Terminal Setup Complete!                       " -ForegroundColor Green
@@ -224,5 +257,6 @@ Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
 Write-Host "  1. Launch 'Alacritty' from your Windows Start Menu / Search." -ForegroundColor White
 Write-Host "  2. It will automatically open into your WSL home directory (~)." -ForegroundColor White
-Write-Host "  3. Inside WSL, run './setup.sh' to finish setting up Zellij & dev tools." -ForegroundColor White
+Write-Host "  3. Inside WSL, run './setup.sh' to finish setting up your environment." -ForegroundColor White
 Write-Host ""
+
