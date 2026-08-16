@@ -237,13 +237,17 @@ sudo apt update
 sudo apt install neovim -y
 
 echo "=== 5. Setup LazyVim ==="
-mv ~/.config/nvim ~/.config/nvim.bak 2>/dev/null || true
-mv ~/.local/share/nvim ~/.local/share/nvim.bak 2>/dev/null || true
-mv ~/.local/state/nvim ~/.local/state/nvim.bak 2>/dev/null || true
-mv ~/.cache/nvim ~/.cache/nvim.bak 2>/dev/null || true
-
-git clone https://github.com/LazyVim/starter ~/.config/nvim
-rm -rf ~/.config/nvim/.git
+if [ -d ~/.config/nvim ] && [ -f ~/.config/nvim/init.lua ]; then
+  echo "LazyVim/Neovim configuration already exists in ~/.config/nvim (skipping clone)."
+else
+  if [ -d ~/.config/nvim ]; then
+    BACKUP_DIR=~/.config/nvim.bak.$(date +%Y%m%d%H%M%S)
+    mv ~/.config/nvim "$BACKUP_DIR"
+    echo "Backed up existing non-LazyVim nvim config to $BACKUP_DIR"
+  fi
+  git clone https://github.com/LazyVim/starter ~/.config/nvim
+  rm -rf ~/.config/nvim/.git
+fi
 
 echo "=== 6. Install mise (Version Manager) ==="
 curl https://mise.run | sh
