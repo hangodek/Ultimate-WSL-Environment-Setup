@@ -628,9 +628,77 @@ else
   echo "Starship is already installed."
 fi
 mkdir -p ~/.config
-if [ ! -f ~/.config/starship.toml ]; then
-  starship preset tokyo-night -o ~/.config/starship.toml 2>/dev/null || true
-fi
+cat <<'EOF' >~/.config/starship.toml
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+
+# Clean, modern & minimal prompt layout
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$golang\
+$ruby\
+$rust\
+$docker_context\
+$package\
+$cmd_duration\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[❯](bold #7aa2f7)"
+error_symbol = "[❯](bold #f7768e)"
+vimcmd_symbol = "[❮](bold #9ece6a)"
+
+[directory]
+style = "bold #7dcfff"
+truncation_length = 3
+truncation_symbol = "…/"
+read_only = " 󰌾"
+read_only_style = "red"
+
+[git_branch]
+symbol = " "
+style = "bold #bb9af7"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold #f7768e"
+format = "([$all_status$ahead_behind]($style) )"
+
+[nodejs]
+symbol = " "
+style = "bold #9ece6a"
+format = "via [$symbol($version )]($style)"
+
+[golang]
+symbol = " "
+style = "bold #7dcfff"
+format = "via [$symbol($version )]($style)"
+
+[ruby]
+symbol = " "
+style = "bold #f7768e"
+format = "via [$symbol($version )]($style)"
+
+[rust]
+symbol = " "
+style = "bold #ff9e64"
+format = "via [$symbol($version )]($style)"
+
+[docker_context]
+symbol = " "
+style = "bold #7aa2f7"
+format = "via [$symbol$context]($style) "
+
+[cmd_duration]
+min_time = 2_000
+style = "bold #e0af68"
+format = "took [$duration]($style) "
+EOF
 
 # Starship MUST be the last eval in .bashrc to wrap all prompt components properly
 if ! grep -q 'starship init bash' ~/.bashrc; then

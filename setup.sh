@@ -441,99 +441,77 @@ else
   echo "Starship is already installed."
 fi
 mkdir -p ~/.config
-if [ ! -f ~/.config/starship.toml ]; then
-  cat <<'EOF' >~/.config/starship.toml
+cat <<'EOF' >~/.config/starship.toml
 "$schema" = 'https://starship.rs/config-schema.json'
 
+add_newline = true
+
+# Clean, modern & minimal prompt layout
 format = """
-[░▒▓](#a3aed2)\
-$os\
-[](bg:#769ff0 fg:#a3aed2)\
 $directory\
-[](fg:#769ff0 bg:#394260)\
 $git_branch\
 $git_status\
-[](fg:#394260 bg:#212736)\
 $nodejs\
-$bun\
-$rust\
 $golang\
 $ruby\
-$php\
-[](fg:#212736 bg:#1d2230)\
-$time\
-[ ](fg:#1d2230)\
-\n$character"""
+$rust\
+$docker_context\
+$package\
+$cmd_duration\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[❯](bold #7aa2f7)"
+error_symbol = "[❯](bold #f7768e)"
+vimcmd_symbol = "[❮](bold #9ece6a)"
 
 [directory]
-style = "fg:#e3e5e5 bg:#769ff0"
-format = "[ $path ]($style)"
+style = "bold #7dcfff"
 truncation_length = 3
 truncation_symbol = "…/"
-
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
+read_only = " 󰌾"
+read_only_style = "red"
 
 [git_branch]
-symbol = ""
-style = "bg:#394260"
-format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
+symbol = " "
+style = "bold #bb9af7"
+format = "on [$symbol$branch]($style) "
 
 [git_status]
-style = "bg:#394260"
-format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
+style = "bold #f7768e"
+format = "([$all_status$ahead_behind]($style) )"
 
 [nodejs]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
-
-[bun]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
-
-[rust]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+symbol = " "
+style = "bold #9ece6a"
+format = "via [$symbol($version )]($style)"
 
 [golang]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+symbol = " "
+style = "bold #7dcfff"
+format = "via [$symbol($version )]($style)"
 
 [ruby]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+symbol = " "
+style = "bold #f7768e"
+format = "via [$symbol($version )]($style)"
 
-[php]
-symbol = ""
-style = "bg:#212736"
-format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+[rust]
+symbol = " "
+style = "bold #ff9e64"
+format = "via [$symbol($version )]($style)"
 
-[time]
-disabled = false
-time_format = "%R"
-style = "bg:#1d2230"
-format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+[docker_context]
+symbol = " "
+style = "bold #7aa2f7"
+format = "via [$symbol$context]($style) "
 
-[os]
-style = "bg:#a3aed2 fg:#090c0c"
-format = "[ $symbol ]($style)"
-disabled = false
-
-[os.symbols]
-Windows = "󰍲"
-Ubuntu = "󰕈"
-Debian = "󰣚"
-Linux = "󰌽"
+[cmd_duration]
+min_time = 2_000
+style = "bold #e0af68"
+format = "took [$duration]($style) "
 EOF
-fi
 
 # Starship MUST be the last eval in .bashrc to wrap all prompt components properly
 if ! grep -q 'starship init bash' ~/.bashrc; then
