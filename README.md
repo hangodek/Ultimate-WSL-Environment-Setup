@@ -47,7 +47,13 @@ Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 Open **PowerShell** on Windows and run:
 
 ```powershell
-# From the repository directory:
+# Run with execution policy bypass (safe for this session):
+powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
+```
+
+*Or within your current PowerShell session:*
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\install-terminal.ps1
 ```
 
