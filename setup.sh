@@ -13,6 +13,11 @@ sudo apt update && sudo apt install -y \
   curl git ripgrep fd-find unzip tar dirmngr gpg gawk \
   xclip xsel ca-certificates lsb-release
 
+# Create symlinks for Debian/Ubuntu package name quirks (fdfind -> fd, batcat -> bat)
+if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
+  sudo ln -sf "$(which fdfind)" /usr/local/bin/fd
+fi
+
 echo "=== 2. Install Docker & Docker Compose (Official Docker Repo) ==="
 sudo apt update
 sudo apt install -y ca-certificates curl
@@ -266,14 +271,36 @@ EOF
 fi
 
 echo "=== 17. Install fzf (Fuzzy Finder) ==="
-sudo apt install -y fzf
-if ! grep -q 'fzf --bash' ~/.bashrc; then
+# Download official binary release if fzf is missing or outdated (< 0.48 without --bash flag)
+if ! command -v fzf &>/dev/null || ! fzf --bash &>/dev/null; then
+  echo "Downloading latest fzf binary from GitHub..."
+  FZF_VERSION=$(curl -s "https://api.github.com/repos/junegunn/fzf/releases/latest" | grep -Po '"tag_name": "\K[^"]*' || echo "v0.60.3")
+  FZF_CLEAN_VER="${FZF_VERSION#v}"
+  curl -Lo /tmp/fzf.tar.gz "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_CLEAN_VER}-linux_amd64.tar.gz"
+  tar -xf /tmp/fzf.tar.gz -C /tmp/
+  chmod +x /tmp/fzf
+  sudo mv /tmp/fzf /usr/local/bin/fzf
+  rm -f /tmp/fzf.tar.gz
+  echo "fzf ($FZF_VERSION) installed successfully."
+else
+  echo "fzf is already up to date ($(fzf --version 2>/dev/null || echo 'fzf'))."
+fi
+
+if ! grep -q 'fzf Fuzzy Finder' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
 # =========================
 # fzf Fuzzy Finder (Ctrl+R history, Ctrl+T files, Alt+C dirs)
 # =========================
-eval "$(fzf --bash)"
+if fzf --bash &>/dev/null; then
+  eval "$(fzf --bash)"
+elif [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
+  source /usr/share/doc/fzf/examples/key-bindings.bash
+  source /usr/share/doc/fzf/examples/completion.bash 2>/dev/null || true
+elif [ -f /usr/share/fzf/key-bindings.bash ]; then
+  source /usr/share/fzf/key-bindings.bash
+  source /usr/share/fzf/completion.bash 2>/dev/null || true
+fi
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#283457,bg:#1a1b26,spinner:#7dcfff,hl:#f7768e --color=fg:#c0caf5,header:#f7768e,info:#7aa2f7,pointer:#7aa2f7 --color=marker:#9ece6a,fg+:#c0caf5,prompt:#7aa2f7,hl+:#f7768e'
@@ -317,6 +344,9 @@ fi
 
 echo "=== 20. Install bat (Syntax-Highlighted cat) ==="
 sudo apt install -y bat
+if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
+  sudo ln -sf "$(which batcat)" /usr/local/bin/bat
+fi
 if ! grep -q "alias bat=" ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
@@ -412,7 +442,97 @@ else
 fi
 mkdir -p ~/.config
 if [ ! -f ~/.config/starship.toml ]; then
-  starship preset tokyo-night -o ~/.config/starship.toml 2>/dev/null || true
+  cat <<'EOF' >~/.config/starship.toml
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[░▒▓](#a3aed2)\
+$os\
+[](bg:#769ff0 fg:#a3aed2)\
+$directory\
+[](fg:#769ff0 bg:#394260)\
+$git_branch\
+$git_status\
+[](fg:#394260 bg:#212736)\
+$nodejs\
+$bun\
+$rust\
+$golang\
+$ruby\
+$php\
+[](fg:#212736 bg:#1d2230)\
+$time\
+[ ](fg:#1d2230)\
+\n$character"""
+
+[directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#394260"
+format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
+
+[git_status]
+style = "bg:#394260"
+format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
+
+[nodejs]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[bun]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[rust]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[golang]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[ruby]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[php]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#1d2230"
+format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[os]
+style = "bg:#a3aed2 fg:#090c0c"
+format = "[ $symbol ]($style)"
+disabled = false
+
+[os.symbols]
+Windows = "󰍲"
+Ubuntu = "󰕈"
+Debian = "󰣚"
+Linux = "󰌽"
+EOF
 fi
 
 # Starship MUST be the last eval in .bashrc to wrap all prompt components properly
