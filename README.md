@@ -42,19 +42,20 @@ Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 
 ## ⚡ Quick Start (2-Step Installation)
 
-### Step 1: Run Terminal Installer on Windows (PowerShell)
+Choose either of these easy methods on Windows:
 
-Open **PowerShell** on Windows and run:
+#### Method A: Double-Click or run `install.bat` (Easiest)
+Simply **double-click** `install.bat` in Windows File Explorer (or run `.\install.bat` in Command Prompt/PowerShell). It automatically handles ExecutionPolicy bypass for you.
 
+#### Method B: Single PowerShell One-Liner (No download required)
+Open **PowerShell** and paste:
 ```powershell
-# Run with execution policy bypass (safe for this session):
-powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
+irm https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/install-terminal.ps1 | iex
 ```
 
-*Or within your current PowerShell session:*
+#### Method C: Manual PowerShell Script
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\install-terminal.ps1
+powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 ```
 
 > **What this does:**
