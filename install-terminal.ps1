@@ -393,5 +393,5 @@ Write-Host "  1. Launch 'Alacritty' from your Windows Start Menu / Search." -For
 Write-Host "  2. It will automatically open into your WSL home directory (~)." -ForegroundColor White
 Write-Host "  3. Inside WSL, simply paste this one-liner to finish setup:" -ForegroundColor White
 Write-Host ""
-Write-Host "     bash -c ""$(curl -fsSL https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/setup.sh)""" -ForegroundColor Yellow
+Write-Host "     bash -c ""$(curl -fsSL https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/setup.sh)""" -ForegroundColor Yellow
 Write-Host ""

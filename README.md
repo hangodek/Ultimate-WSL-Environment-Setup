@@ -70,7 +70,7 @@ Simply **double-click** `install.bat` in Windows File Explorer (or run `.\instal
 #### Method B: Single PowerShell One-Liner (No download required)
 Open **PowerShell** and paste:
 ```powershell
-irm https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/install-terminal.ps1 | iex
+irm https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/install-terminal.ps1 | iex
 ```
 
 #### Method C: Manual PowerShell Script
@@ -92,7 +92,7 @@ Launch your new **Alacritty** terminal (or open any WSL shell) and choose either
 
 #### Method A: Single Linux One-Liner (No repo cloning needed)
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/setup.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/setup.sh)"
 ```
 
 #### Method B: Manual Run (If already cloned)
