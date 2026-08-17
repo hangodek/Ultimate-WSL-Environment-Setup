@@ -366,10 +366,9 @@ processors=4
 # Swap partition size
 swap=2GB
 
+[experimental]
 # Automatically return unused Linux memory back to Windows (prevents vmmem growth)
 autoMemoryReclaim=gradual
-
-[experimental]
 sparseVhd=true
 '@
     Set-Content -Path $wslConfigFile -Value $wslConfigContent -Encoding UTF8
