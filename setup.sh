@@ -126,6 +126,9 @@ if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
 # =========================
 # Dev Custom Aliases
 # =========================
+# System & Package Management
+alias upd="sudo apt update && sudo apt upgrade"
+
 # Editor & Frameworks
 alias n="nvim"
 alias r="rails"

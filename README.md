@@ -171,6 +171,7 @@ chmod +x setup.sh
 
 | Alias | Command | Description | Usage Examples |
 | :--- | :--- | :--- | :--- |
+| **`upd`** | `sudo apt update && sudo apt upgrade` | Update package index and upgrade all system packages. | • `upd` |
 | **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
 | **`agyd`** | `agy --dangerously-skip-permissions` | Launch Antigravity assistant in trusted/yolo mode. | • `agyd` |
 | **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s`<br>• `r c`<br>• `r g migration CreateUsers` |
@@ -325,6 +326,9 @@ if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
 # =========================
 # Dev Custom Aliases
 # =========================
+# System & Package Management
+alias upd="sudo apt update && sudo apt upgrade"
+
 # Editor & Frameworks
 alias n="nvim"
 alias r="rails"
