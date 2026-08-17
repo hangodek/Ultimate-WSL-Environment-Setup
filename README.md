@@ -7,6 +7,7 @@ An automated, two-part setup to give you a **99% bare-metal Linux experience** i
 
 Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 - **GPU-Accelerated Window**: Replaces sluggish Windows Terminal with **Alacritty**.
+- **Omakub Windows Workflow**: Pre-configured **PowerToys** bringing macOS / Omakub shortcuts (`Win + Space` for Spotlight search & `Win + W` to close active applications).
 - **Modern Multiplexer**: Pre-configured **Zellij** for tabs, panes, floating terminals, and session persistence.
 - **Starship Prompt**: Instantaneous, informative prompt with git status and Tokyo Night theme.
 - **Fuzzy Search Everywhere**: **fzf** for history (`Ctrl+R`), files (`Ctrl+T`), and directories (`Alt+C`).
@@ -31,6 +32,10 @@ Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 │  │  • Tokyo Night Dark Color Scheme                                 │  │
 │  │  • Directly launches `wsl.exe --cd ~`                            │  │
 │  │  • RAM Limit configured in `%USERPROFILE%\.wslconfig`             │  │
+│  ├──────────────────────────────────────────────────────────────────┤  │
+│  │  Microsoft PowerToys (Omakub Hotkeys)                            │  │
+│  │  • `Win + Space` ──► Spotlight App / File Launcher (PowerToys Run)│  │
+│  │  • `Win + W`     ──► Close Active Application Window (Alt + F4)  │  │
 │  └─────────────────────────────────┬────────────────────────────────┘  │
 └────────────────────────────────────┼───────────────────────────────────┘
                                      │ (Zero Latency)
@@ -74,9 +79,10 @@ powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 ```
 
 > **What this does:**
-> 1. Installs **Alacritty** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
+> 1. Installs **Alacritty**, **Microsoft PowerToys**, and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
 > 2. Auto-generates `%APPDATA%\alacritty\alacritty.toml` configured with Tokyo Night colors, Nerd Font glyphs, and auto-launching into WSL `~`.
-> 3. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
+> 3. Configures **PowerToys Run** (`Win + Space`) and **Keyboard Manager** (`Win + W` &rarr; Close Window).
+> 4. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
 
 ---
 
@@ -102,6 +108,7 @@ chmod +x setup.sh
 | Component | Tool | Description |
 | :--- | :--- | :--- |
 | **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host. |
+| **Launcher & Shortcuts**| **PowerToys** | Spotlight search (`Win + Space`) & Omakub-style window closer (`Win + W`). |
 | **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows, and status bar. |
 | **Prompt** | **Starship** | Blazing-fast prompt with Tokyo Night theme, git status, and runtime versions. |
 | **Fuzzy Finder** | **fzf** | Interactive search for command history (`Ctrl+R`), files (`Ctrl+T`), and dirs (`Alt+C`). |
@@ -124,14 +131,16 @@ chmod +x setup.sh
 
 ## ⌨️ Shortcuts & Cheatsheet
 
-### Alacritty (Windows Host)
-| Shortcut | Action |
-| :--- | :--- |
-| `Ctrl + Shift + C` | Copy selected text |
-| `Ctrl + Shift + V` | Paste from clipboard |
-| `Ctrl + Plus (+)` | Increase font size |
-| `Ctrl + Minus (-)` | Decrease font size |
-| `Ctrl + 0` | Reset font size |
+### Windows & Omakub Workflow Shortcuts
+| Shortcut | Tool | Action & Behavior |
+| :--- | :--- | :--- |
+| **`Win + Space`** | **PowerToys Run** | Spotlight-style instant app launcher, file finder, and calculator. |
+| **`Win + W`** | **Keyboard Manager** | Close currently active application window (Omakub / Mac style, remapped from `Alt + F4`). |
+| **`Ctrl + Shift + C`** | **Alacritty** | Copy selected text to clipboard. |
+| **`Ctrl + Shift + V`** | **Alacritty** | Paste from clipboard. |
+| **`Ctrl + Plus (+)`** | **Alacritty** | Increase font size. |
+| **`Ctrl + Minus (-)`** | **Alacritty** | Decrease font size. |
+| **`Ctrl + 0`** | **Alacritty** | Reset font size to default. |
 
 ### Shell Navigation & Fuzzy Find
 | Shortcut / Command | Tool | Action |

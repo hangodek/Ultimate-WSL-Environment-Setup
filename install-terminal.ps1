@@ -1,9 +1,13 @@
 <#
 .SYNOPSIS
-    Automated Windows Terminal Setup for WSL (Alacritty + JetBrainsMono Nerd Font)
+    Automated Windows Environment Setup for WSL (Alacritty + PowerToys + JetBrainsMono Nerd Font)
 .DESCRIPTION
-    Installs Alacritty terminal emulator and JetBrainsMono Nerd Font via WinGet,
-    and automatically configures Alacritty with Tokyo Night theme and WSL default shell.
+    Installs Alacritty terminal emulator, Microsoft PowerToys, and JetBrainsMono Nerd Font via WinGet.
+    Automatically configures:
+    - Alacritty with Tokyo Night theme & direct WSL shell integration.
+    - PowerToys Run with Win + Space (Spotlight-like launcher).
+    - PowerToys Keyboard Manager with Win + W -> Alt + F4 (Close application, Omakub style).
+    - WSL 2 performance & memory cap via .wslconfig.
 .NOTES
     Run from PowerShell (no administrator privileges strictly required unless WinGet prompts).
 #>
@@ -15,12 +19,12 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  🚀 Windows Terminal Setup: Alacritty + WSL Integration   " -ForegroundColor Cyan
+Write-Host "  🚀 Windows Setup: Alacritty + PowerToys + WSL Tools       " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Check WinGet availability
-Write-Host "[1/4] Checking WinGet package manager..." -ForegroundColor Yellow
+Write-Host "[1/6] Checking WinGet package manager..." -ForegroundColor Yellow
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Error "WinGet is not available on this system. Please install 'App Installer' from the Microsoft Store or update Windows 10/11."
     exit 1
@@ -70,17 +74,22 @@ function Install-WingetApp {
 
 # 2. Install Alacritty
 Write-Host ""
-Write-Host "[2/4] Installing Alacritty GPU-accelerated Terminal..." -ForegroundColor Yellow
+Write-Host "[2/6] Installing Alacritty GPU-accelerated Terminal..." -ForegroundColor Yellow
 Install-WingetApp -PackageId "Alacritty.Alacritty" -DisplayName "Alacritty"
 
 # 3. Install JetBrainsMono Nerd Font
 Write-Host ""
-Write-Host "[3/4] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
+Write-Host "[3/6] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
 Install-WingetApp -PackageId "DEVCOM.JetBrainsMonoNerdFont" -DisplayName "JetBrainsMono Nerd Font" -FallbackId "JetBrains.JetBrainsMono.NerdFont"
 
-# 4. Configure Alacritty
+# 4. Install Microsoft PowerToys
 Write-Host ""
-Write-Host "[4/4] Configuring Alacritty for WSL & Tokyo Night Theme..." -ForegroundColor Yellow
+Write-Host "[4/6] Installing Microsoft PowerToys..." -ForegroundColor Yellow
+Install-WingetApp -PackageId "Microsoft.PowerToys" -DisplayName "Microsoft PowerToys"
+
+# 5. Configure Alacritty
+Write-Host ""
+Write-Host "[5/6] Configuring Alacritty for WSL & Tokyo Night Theme..." -ForegroundColor Yellow
 
 $alacrittyConfigDir = Join-Path -Path $env:APPDATA -ChildPath "alacritty"
 if (-not (Test-Path -Path $alacrittyConfigDir)) {
@@ -216,9 +225,130 @@ bindings = [
 Set-Content -Path $alacrittyConfigFile -Value $alacrittyConfigContent -Encoding UTF8
 Write-Host "  ✓ Wrote configuration to $alacrittyConfigFile" -ForegroundColor Green
 
-# 5. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+# 6. Configure PowerToys Keybindings (Win+Space -> Spotlight, Win+W -> Close Application)
 Write-Host ""
-Write-Host "[5/5] Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
+Write-Host "[6/6] Configuring PowerToys Shortcuts (Win+Space & Win+W Omakub Style)..." -ForegroundColor Yellow
+
+$powerToysRootDir = Join-Path -Path $env:LOCALAPPDATA -ChildPath "Microsoft\PowerToys"
+$powerToysRunDir  = Join-Path -Path $powerToysRootDir -ChildPath "PowerToys Run"
+$powerToysKbmDir  = Join-Path -Path $powerToysRootDir -ChildPath "Keyboard Manager"
+
+# Stop PowerToys gracefully if running to avoid overwriting settings
+Get-Process -Name "PowerToys*", "PowerToys.KeyboardManagerEngine" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+# Ensure directories exist
+@($powerToysRootDir, $powerToysRunDir, $powerToysKbmDir) | ForEach-Object {
+    if (-not (Test-Path -Path $_)) {
+        New-Item -ItemType Directory -Path $_ -Force | Out-Null
+    }
+}
+
+# 6a. Main PowerToys Settings (Enable modules & startup)
+$ptSettingsFile = Join-Path -Path $powerToysRootDir -ChildPath "settings.json"
+$ptSettingsObj = @{
+    "startup" = $true
+    "enabled" = @{
+        "PowerToys Run"    = $true
+        "Keyboard Manager" = $true
+    }
+}
+
+if (Test-Path -Path $ptSettingsFile) {
+    try {
+        $existingPtSettings = Get-Content -Path $ptSettingsFile -Raw | ConvertFrom-Json
+        if ($null -eq $existingPtSettings.enabled) {
+            $existingPtSettings | Add-Member -MemberType NoteProperty -Name "enabled" -Value ([PSCustomObject]@{})
+        }
+        $existingPtSettings.startup = $true
+        $existingPtSettings.enabled.'PowerToys Run' = $true
+        $existingPtSettings.enabled.'Keyboard Manager' = $true
+        $ptSettingsJson = $existingPtSettings | ConvertTo-Json -Depth 10
+    } catch {
+        $ptSettingsJson = $ptSettingsObj | ConvertTo-Json -Depth 10
+    }
+} else {
+    $ptSettingsJson = $ptSettingsObj | ConvertTo-Json -Depth 10
+}
+Set-Content -Path $ptSettingsFile -Value $ptSettingsJson -Encoding UTF8
+Write-Host "  ✓ Enabled PowerToys Run & Keyboard Manager in $ptSettingsFile" -ForegroundColor Green
+
+# 6b. PowerToys Run (Set shortcut to Win + Space, VK_SPACE 32)
+$ptRunSettingsFile = Join-Path -Path $powerToysRunDir -ChildPath "settings.json"
+$ptRunSettingsContent = @'
+{
+  "name": "PowerToys Run",
+  "version": "1.0",
+  "properties": {
+    "open_powerlauncher": {
+      "win": true,
+      "ctrl": false,
+      "alt": false,
+      "shift": false,
+      "code": 32,
+      "key": "Space"
+    }
+  }
+}
+'@
+Set-Content -Path $ptRunSettingsFile -Value $ptRunSettingsContent -Encoding UTF8
+Write-Host "  ✓ Configured PowerToys Run shortcut: Win + Space (Spotlight style)" -ForegroundColor Green
+
+# 6c. Keyboard Manager (Remap Win + W [91;87] -> Alt + F4 [164;115] to close active application)
+$ptKbmDefaultFile = Join-Path -Path $powerToysKbmDir -ChildPath "default.json"
+$ptKbmDefaultContent = @'
+{
+  "remapKeys": {
+    "inProcess": []
+  },
+  "remapKeysToText": {
+    "inProcess": []
+  },
+  "remapShortcuts": {
+    "global": [
+      {
+        "originalKeys": "91;87",
+        "newRemapKeys": "164;115"
+      }
+    ],
+    "appSpecific": []
+  }
+}
+'@
+Set-Content -Path $ptKbmDefaultFile -Value $ptKbmDefaultContent -Encoding UTF8
+
+$ptKbmSettingsFile = Join-Path -Path $powerToysKbmDir -ChildPath "settings.json"
+$ptKbmSettingsContent = @'
+{
+  "name": "Keyboard Manager",
+  "version": "1.0",
+  "properties": {
+    "activeConfiguration": {
+      "value": "default"
+    },
+    "keyboardManager_input_remapShortcuts": {
+      "value": [
+        {
+          "originalKeys": "91;87",
+          "newRemapKeys": "164;115"
+        }
+      ]
+    }
+  }
+}
+'@
+Set-Content -Path $ptKbmSettingsFile -Value $ptKbmSettingsContent -Encoding UTF8
+Write-Host "  ✓ Configured Keyboard Manager: Win + W -> Alt + F4 (Close application Omakub style)" -ForegroundColor Green
+
+# Launch PowerToys in background if installed
+$powerToysExe = Join-Path -Path $env:ProgramFiles -ChildPath "PowerToys\PowerToys.exe"
+if (Test-Path -Path $powerToysExe) {
+    Start-Process -FilePath $powerToysExe -WindowStyle Hidden -ErrorAction SilentlyContinue
+    Write-Host "  ✓ Started PowerToys in background." -ForegroundColor Green
+}
+
+# 7. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+Write-Host ""
+Write-Host "Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
 $wslConfigFile = Join-Path -Path $env:USERPROFILE -ChildPath ".wslconfig"
 if (-not (Test-Path -Path $wslConfigFile)) {
     $wslConfigContent = @'
@@ -251,8 +381,12 @@ sparseVhd=true
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "  🎉 Windows Terminal Setup Complete!                       " -ForegroundColor Green
+Write-Host "  🎉 Windows Setup Complete!                                " -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "✨ Windows & Omakub Keybindings Enabled:" -ForegroundColor Cyan
+Write-Host "  • Win + Space  -> PowerToys Run (Spotlight App/File Launcher)" -ForegroundColor Yellow
+Write-Host "  • Win + W      -> Close Active Application Window (Omakub style)" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
 Write-Host "  1. Launch 'Alacritty' from your Windows Start Menu / Search." -ForegroundColor White
@@ -261,4 +395,3 @@ Write-Host "  3. Inside WSL, simply paste this one-liner to finish setup:" -Fore
 Write-Host ""
 Write-Host "     bash -c ""$(curl -fsSL https://raw.githubusercontent.com/hangodek/WSL-Environtment-Setup/main/setup.sh)""" -ForegroundColor Yellow
 Write-Host ""
-
