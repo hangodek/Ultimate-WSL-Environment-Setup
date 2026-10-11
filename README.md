@@ -7,14 +7,13 @@ An automated, two-part setup to give you a **99% bare-metal Linux experience** i
 
 Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 - **GPU-Accelerated Window**: Replaces sluggish Windows Terminal with **Alacritty**.
-- **Omakub Windows Workflow**: Pre-configured **PowerToys** bringing macOS / Omakub shortcuts (`Win + Space` for Spotlight search & `Win + W` to close active applications).
 - **Modern Multiplexer**: Pre-configured **Zellij** for tabs, panes, floating terminals, and session persistence.
 - **Starship Prompt**: Instantaneous, informative prompt with git status and Tokyo Night theme.
 - **Fuzzy Search Everywhere**: **fzf** for history (`Ctrl+R`), files (`Ctrl+T`), and directories (`Alt+C`).
 - **Smart Directory Jumping**: **zoxide** (`z`) learns your most frequent directories.
 - **Modern Coreutils**: **eza** (icon & git-aware `ls`), **bat** (syntax-highlighted `cat`), and **git-delta** (beautiful diffs).
 - **TUI Git & Docker**: **lazygit** (integrated with LazyVim via `<leader>gg`) and **lazydocker**.
-- **AI Tooling Built-in**: **Antigravity CLI** (`agy` / `agyd`), **OpenCode**, and **9router** AI gateway.
+- **AI Tooling Built-in**: **Antigravity CLI** (`agy` / `agyd`), **OpenCode** (`opencode` / `oc` / `oca`), and **9router** AI gateway (systemd auto-start on boot).
 - **Unified Tokyo Night Theme**: Seamless colors across Alacritty, Zellij, Neovim (LazyVim), fzf, Starship, and delta.
 - **RAM-Efficient WSL 2**: Auto-generated `.wslconfig` memory limits and on-demand Docker databases.
 - **True Clipboard Sync**: Native copy/paste across Windows and Linux.
@@ -32,10 +31,6 @@ Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 │  │  • Tokyo Night Dark Color Scheme                                 │  │
 │  │  • Directly launches `wsl.exe --cd ~`                            │  │
 │  │  • RAM Limit configured in `%USERPROFILE%\.wslconfig`             │  │
-│  ├──────────────────────────────────────────────────────────────────┤  │
-│  │  Microsoft PowerToys (Omakub Hotkeys)                            │  │
-│  │  • `Win + Space` ──► Spotlight App / File Launcher (PowerToys Run)│  │
-│  │  • `Win + W`     ──► Close Active Application Window (Alt + F4)  │  │
 │  └─────────────────────────────────┬────────────────────────────────┘  │
 └────────────────────────────────────┼───────────────────────────────────┘
                                      │ (Zero Latency)
@@ -79,10 +74,9 @@ powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 ```
 
 > **What this does:**
-> 1. Installs **Alacritty**, **Microsoft PowerToys**, and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
+> 1. Installs **Alacritty** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
 > 2. Auto-generates `%APPDATA%\alacritty\alacritty.toml` configured with Tokyo Night colors, Nerd Font glyphs, and auto-launching into WSL `~`.
-> 3. Configures **PowerToys Run** (`Win + Space`) and **Keyboard Manager** (`Win + W` &rarr; Close Window).
-> 4. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
+> 3. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
 
 ---
 
@@ -108,7 +102,6 @@ chmod +x setup.sh
 | Component | Tool | Description |
 | :--- | :--- | :--- |
 | **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host. |
-| **Launcher & Shortcuts**| **PowerToys** | Spotlight search (`Win + Space`) & Omakub-style window closer (`Win + W`). |
 | **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows, and status bar. |
 | **Prompt** | **Starship** | Blazing-fast prompt with Tokyo Night theme, git status, and runtime versions. |
 | **Fuzzy Finder** | **fzf** | Interactive search for command history (`Ctrl+R`), files (`Ctrl+T`), and dirs (`Alt+C`). |
@@ -117,8 +110,8 @@ chmod +x setup.sh
 | **Modern cat** | **bat** | Syntax-highlighted file viewing with line numbers and git diff gutters. |
 | **Git Diff Pager** | **git-delta** | Syntax-highlighted, side-by-side git diffs with Tokyo Night styling. |
 | **Git & Docker TUIs** | **lazygit / lazydocker** | Full keyboard-driven TUI clients for git management and container control. |
-| **AI Assistants** | **Antigravity / OpenCode** | Built-in CLI coding assistants with shortcuts (`agyd`, `opencode`). |
-| **AI Gateway** | **9router** | Local proxy for fallback routing and token compression. |
+| **AI Assistants** | **Antigravity / OpenCode** | Built-in CLI coding assistants with shortcuts (`agyd`, `opencode`, `oc`, `oca`). |
+| **AI Gateway** | **9router** | Local proxy for fallback routing and token compression (auto-starts on boot via systemd). |
 | **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
 | **Editor** | **Neovim + LazyVim** | Modern IDE experience (animations disabled, clean picker, full LSP). |
 | **Shell Experience**| **Readline / Bash** | Smart case-insensitive tab completion + 100k deduplicated command history. |
@@ -131,11 +124,9 @@ chmod +x setup.sh
 
 ## ⌨️ Shortcuts & Cheatsheet
 
-### Windows & Omakub Workflow Shortcuts
+### Windows & Terminal Shortcuts
 | Shortcut | Tool | Action & Behavior |
 | :--- | :--- | :--- |
-| **`Win + Space`** | **PowerToys Run** | Spotlight-style instant app launcher, file finder, and calculator. |
-| **`Win + W`** | **Keyboard Manager** | Close currently active application window (Omakub / Mac style, remapped from `Alt + F4`). |
 | **`Ctrl + Shift + C`** | **Alacritty** | Copy selected text to clipboard. |
 | **`Ctrl + Shift + V`** | **Alacritty** | Paste from clipboard. |
 | **`Ctrl + Plus (+)`** | **Alacritty** | Increase font size. |
@@ -174,6 +165,8 @@ chmod +x setup.sh
 | **`upd`** | `sudo apt update && sudo apt upgrade` | Update package index and upgrade all system packages. | • `upd` |
 | **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
 | **`agyd`** | `agy --dangerously-skip-permissions` | Launch Antigravity assistant in trusted/yolo mode. | • `agyd` |
+| **`oc`** | `opencode` | Shortcut for OpenCode AI assistant. | • `oc` |
+| **`oca`** | `opencode --auto` | Run OpenCode in autonomous execution mode. | • `oca` |
 | **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s`<br>• `r c`<br>• `r g migration CreateUsers` |
 | **`cd`** | `z` | Auto-routed to zoxide smart directory jumper. | • `cd my-project` |
 | **`ls`** | `eza --icons ...` | Modern icon-aware file listing. | • `ls`<br>• `ll` *(long)*<br>• `lt` *(tree)* |
@@ -201,8 +194,8 @@ Databases are managed through Docker Compose profiles. They only consume memory 
 #!/bin/bash
 set -e
 
-# Ensure local user binaries and Go binaries are in PATH during script execution
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+# Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
+export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
 
 echo "=== 1. Update System & Install Base Dependencies (Omakub + WSL Tools) ==="
 sudo apt update && sudo apt install -y \
@@ -414,20 +407,62 @@ alias agyd='agy --dangerously-skip-permissions'
 EOF
 fi
 
-echo "=== 13. Install OpenCode CLI ==="
-if ! command -v opencode &>/dev/null; then
+echo "=== 13. Install OpenCode CLI & Aliases ==="
+if ! command -v opencode &>/dev/null && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
+  echo "Installing OpenCode CLI..."
   curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
 else
   echo "OpenCode CLI is already installed."
 fi
 
-echo "=== 14. Install 9router AI Gateway ==="
+# Ensure opencode is symlinked to ~/.local/bin and in PATH
+if [ -f "$HOME/.opencode/bin/opencode" ]; then
+  mkdir -p "$HOME/.local/bin"
+  ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+fi
+
+if ! grep -q 'OpenCode CLI & Aliases' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# OpenCode CLI & Aliases
+# =========================
+export PATH="$HOME/.opencode/bin:$PATH"
+alias oc='opencode'
+alias oca='opencode --auto'
+EOF
+fi
+
+echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
 eval "$($HOME/.local/bin/mise activate bash)" || true
 if ! command -v 9router &>/dev/null; then
   $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
 else
   echo "9router is already installed."
 fi
+
+# Configure 9router systemd user service to auto-start on boot
+mkdir -p ~/.config/systemd/user
+cat <<'EOF' >~/.config/systemd/user/9router.service
+[Unit]
+Description=9router AI Gateway
+After=network.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:%h/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=%h/.local/bin/mise exec -- 9router --tray --no-browser --skip-update
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload 2>/dev/null || true
+systemctl --user enable 9router.service 2>/dev/null || true
+systemctl --user restart 9router.service 2>/dev/null || true
+sudo loginctl enable-linger "$USER" 2>/dev/null || true
 
 echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
 if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
@@ -512,16 +547,6 @@ fi
 
 echo "=== 18. Install zoxide (Smart cd) ==="
 sudo apt install -y zoxide
-if ! grep -q 'zoxide init bash' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# zoxide (Smart Directory Jumper)
-# =========================
-eval "$(zoxide init bash)"
-alias cd='z'
-EOF
-fi
 
 echo "=== 19. Install eza (Modern ls) ==="
 if ! command -v eza &>/dev/null; then
@@ -713,14 +738,31 @@ style = "bold #e0af68"
 format = "took [$duration]($style) "
 EOF
 
-# Starship MUST be the last eval in .bashrc to wrap all prompt components properly
+# Starship wraps prompt components
 if ! grep -q 'starship init bash' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
 # =========================
-# Starship Prompt (Must be last in .bashrc)
+# Starship Prompt
 # =========================
 eval "$(starship init bash)"
+EOF
+fi
+
+echo "=== 28. Configure zoxide (Must be initialized AFTER Starship at the end of .bashrc) ==="
+# Remove any previous zoxide block that may have been placed before Starship
+sed -i '/zoxide (Smart Directory Jumper)/{N;N;N;N;d}' ~/.bashrc 2>/dev/null || true
+sed -i '/eval "\$(zoxide init bash)"/d' ~/.bashrc 2>/dev/null || true
+sed -i "/alias cd='z'/d" ~/.bashrc 2>/dev/null || true
+
+if ! grep -q 'zoxide init bash' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# zoxide (Smart Directory Jumper — Initialized after Starship to avoid doctor warning)
+# =========================
+eval "$(zoxide init bash)"
+alias cd='z'
 EOF
 fi
 

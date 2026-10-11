@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Ensure local user binaries and Go binaries are in PATH during script execution
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+# Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
+export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
 
 echo "=== 1. Update System & Install Base Dependencies (Omakub + WSL Tools) ==="
 sudo apt update && sudo apt install -y \
@@ -214,20 +214,62 @@ alias agyd='agy --dangerously-skip-permissions'
 EOF
 fi
 
-echo "=== 13. Install OpenCode CLI ==="
-if ! command -v opencode &>/dev/null; then
+echo "=== 13. Install OpenCode CLI & Aliases ==="
+if ! command -v opencode &>/dev/null && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
+  echo "Installing OpenCode CLI..."
   curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
 else
   echo "OpenCode CLI is already installed."
 fi
 
-echo "=== 14. Install 9router AI Gateway ==="
+# Ensure opencode is symlinked to ~/.local/bin and in PATH
+if [ -f "$HOME/.opencode/bin/opencode" ]; then
+  mkdir -p "$HOME/.local/bin"
+  ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+fi
+
+if ! grep -q 'OpenCode CLI & Aliases' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# OpenCode CLI & Aliases
+# =========================
+export PATH="$HOME/.opencode/bin:$PATH"
+alias oc='opencode'
+alias oca='opencode --auto'
+EOF
+fi
+
+echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
 eval "$($HOME/.local/bin/mise activate bash)" || true
 if ! command -v 9router &>/dev/null; then
   $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
 else
   echo "9router is already installed."
 fi
+
+# Configure 9router systemd user service to auto-start on boot
+mkdir -p ~/.config/systemd/user
+cat <<'EOF' >~/.config/systemd/user/9router.service
+[Unit]
+Description=9router AI Gateway
+After=network.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:%h/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=%h/.local/bin/mise exec -- 9router --tray --no-browser --skip-update
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload 2>/dev/null || true
+systemctl --user enable 9router.service 2>/dev/null || true
+systemctl --user restart 9router.service 2>/dev/null || true
+sudo loginctl enable-linger "$USER" 2>/dev/null || true
 
 echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
 if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
@@ -312,16 +354,6 @@ fi
 
 echo "=== 18. Install zoxide (Smart cd) ==="
 sudo apt install -y zoxide
-if ! grep -q 'zoxide init bash' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# zoxide (Smart Directory Jumper)
-# =========================
-eval "$(zoxide init bash)"
-alias cd='z'
-EOF
-fi
 
 echo "=== 19. Install eza (Modern ls) ==="
 if ! command -v eza &>/dev/null; then
@@ -516,14 +548,31 @@ style = "bold #e0af68"
 format = "took [$duration]($style) "
 EOF
 
-# Starship MUST be the last eval in .bashrc to wrap all prompt components properly
+# Starship wraps prompt components
 if ! grep -q 'starship init bash' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
 # =========================
-# Starship Prompt (Must be last in .bashrc)
+# Starship Prompt
 # =========================
 eval "$(starship init bash)"
+EOF
+fi
+
+echo "=== 28. Configure zoxide (Must be initialized AFTER Starship at the end of .bashrc) ==="
+# Remove any previous zoxide block that may have been placed before Starship
+sed -i '/zoxide (Smart Directory Jumper)/{N;N;N;N;d}' ~/.bashrc 2>/dev/null || true
+sed -i '/eval "\$(zoxide init bash)"/d' ~/.bashrc 2>/dev/null || true
+sed -i "/alias cd='z'/d" ~/.bashrc 2>/dev/null || true
+
+if ! grep -q 'zoxide init bash' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# =========================
+# zoxide (Smart Directory Jumper — Initialized after Starship to avoid doctor warning)
+# =========================
+eval "$(zoxide init bash)"
+alias cd='z'
 EOF
 fi
 
