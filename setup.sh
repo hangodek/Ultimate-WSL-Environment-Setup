@@ -162,12 +162,11 @@ fi
 
 # Configure Zellij
 mkdir -p ~/.config/zellij
-if [ ! -f ~/.config/zellij/config.kdl ]; then
-  cat <<'EOF' >~/.config/zellij/config.kdl
+cat <<'EOF' >~/.config/zellij/config.kdl
 // ==========================================================
-// Zellij Configuration — WSL Development Environment
+// Zellij Configuration — WSL Development Environment (Nord)
 // ==========================================================
-theme "tokyo-night-dark"
+theme "nord"
 default_shell "bash"
 pane_frames false
 mouse_mode true
@@ -180,8 +179,23 @@ ui {
         hide_session_name false
     }
 }
+
+themes {
+    nord {
+        fg "#d8dee9"
+        bg "#2e3440"
+        black "#3b4252"
+        red "#bf616a"
+        green "#a3be8c"
+        yellow "#ebcb8b"
+        blue "#81a1c1"
+        magenta "#b48ead"
+        cyan "#88c0d0"
+        white "#e5e9f0"
+        orange "#d08770"
+    }
+}
 EOF
-fi
 
 echo "=== 11. Configure Zellij Auto-Start in .bashrc ==="
 if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
@@ -284,7 +298,7 @@ set completion-map-case on
 EOF
 fi
 
-echo "=== 16. Configure Neovim / LazyVim Optimizations ==="
+echo "=== 16. Configure Neovim / LazyVim Optimizations & Nord Theme ==="
 OPTIONS_FILE=~/.config/nvim/lua/config/options.lua
 if [ -f "$OPTIONS_FILE" ] && ! grep -q 'snacks_animate' "$OPTIONS_FILE"; then
   echo '' >>"$OPTIONS_FILE"
@@ -314,6 +328,31 @@ return {
 }
 EOF
 fi
+
+COLOR_PLUGIN=~/.config/nvim/lua/plugins/colorscheme.lua
+mkdir -p ~/.config/nvim/lua/plugins
+cat <<'EOF' >"$COLOR_PLUGIN"
+return {
+  {
+    "shaunsingh/nord.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.g.nord_contrast = true
+      vim.g.nord_borders = false
+      vim.g.nord_disable_background = false
+      vim.g.nord_italic = false
+      require("nord").set()
+    end,
+  },
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "nord",
+    },
+  },
+}
+EOF
 
 echo "=== 17. Install fzf (Fuzzy Finder) ==="
 # Download official binary release if fzf is missing or outdated (< 0.48 without --bash flag)
@@ -348,7 +387,7 @@ elif [ -f /usr/share/fzf/key-bindings.bash ]; then
 fi
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#283457,bg:#1a1b26,spinner:#7dcfff,hl:#f7768e --color=fg:#c0caf5,header:#f7768e,info:#7aa2f7,pointer:#7aa2f7 --color=marker:#9ece6a,fg+:#c0caf5,prompt:#7aa2f7,hl+:#f7768e'
+export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#3b4252,bg:#2e3440,spinner:#88c0d0,hl:#81a1c1 --color=fg:#d8dee9,header:#81a1c1,info:#ebcb8b,pointer:#88c0d0 --color=marker:#a3be8c,fg+:#eceff4,prompt:#81a1c1,hl+:#88c0d0'
 EOF
 fi
 
@@ -386,8 +425,9 @@ if ! grep -q "alias bat=" ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
 # =========================
-# bat (Syntax-Highlighted cat)
+# bat (Syntax-Highlighted cat — Nord theme)
 # =========================
+export BAT_THEME="Nord"
 alias cat='batcat --paging=never'
 alias bat='batcat'
 EOF
@@ -431,13 +471,11 @@ fi
 
 echo "=== 24. Install git-delta (Syntax-Highlighted Git Diffs) ==="
 sudo apt install -y git-delta || echo "git-delta package check complete."
-if ! git config --global core.pager 2>/dev/null | grep -q delta; then
-  git config --global core.pager delta
-  git config --global interactive.diffFilter "delta --color-only"
-  git config --global delta.line-numbers true
-  git config --global delta.dark true
-  git config --global delta.syntax-theme "Tokyo Night"
-fi
+git config --global core.pager delta
+git config --global interactive.diffFilter "delta --color-only"
+git config --global delta.line-numbers true
+git config --global delta.dark true
+git config --global delta.syntax-theme "Nord"
 
 echo "=== 25. Configure Better Bash History ==="
 if ! grep -q 'Better Bash History' ~/.bashrc; then
@@ -497,12 +535,12 @@ $line_break\
 $character"""
 
 [character]
-success_symbol = "[❯](bold #7aa2f7)"
-error_symbol = "[❯](bold #f7768e)"
-vimcmd_symbol = "[❮](bold #9ece6a)"
+success_symbol = "[❯](bold #81a1c1)"
+error_symbol = "[❯](bold #bf616a)"
+vimcmd_symbol = "[❮](bold #a3be8c)"
 
 [directory]
-style = "bold #7dcfff"
+style = "bold #88c0d0"
 truncation_length = 3
 truncation_symbol = "…/"
 read_only = " 󰌾"
@@ -510,41 +548,41 @@ read_only_style = "red"
 
 [git_branch]
 symbol = " "
-style = "bold #bb9af7"
+style = "bold #b48ead"
 format = "on [$symbol$branch]($style) "
 
 [git_status]
-style = "bold #f7768e"
+style = "bold #bf616a"
 format = "([$all_status$ahead_behind]($style) )"
 
 [nodejs]
 symbol = " "
-style = "bold #9ece6a"
+style = "bold #a3be8c"
 format = "via [$symbol($version )]($style)"
 
 [golang]
 symbol = " "
-style = "bold #7dcfff"
+style = "bold #88c0d0"
 format = "via [$symbol($version )]($style)"
 
 [ruby]
 symbol = " "
-style = "bold #f7768e"
+style = "bold #bf616a"
 format = "via [$symbol($version )]($style)"
 
 [rust]
 symbol = " "
-style = "bold #ff9e64"
+style = "bold #d08770"
 format = "via [$symbol($version )]($style)"
 
 [docker_context]
 symbol = " "
-style = "bold #7aa2f7"
+style = "bold #81a1c1"
 format = "via [$symbol$context]($style) "
 
 [cmd_duration]
 min_time = 2_000
-style = "bold #e0af68"
+style = "bold #ebcb8b"
 format = "took [$duration]($style) "
 EOF
 

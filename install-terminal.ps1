@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-    Automated Windows Environment Setup for WSL (Alacritty + JetBrainsMono Nerd Font)
+    Automated Windows Environment Setup for WSL (Alacritty + VS Code + JetBrainsMono Nerd Font + Nord Theme)
 .DESCRIPTION
-    Installs Alacritty terminal emulator and JetBrainsMono Nerd Font via WinGet.
+    Installs Alacritty terminal emulator, Visual Studio Code, and JetBrainsMono Nerd Font via WinGet.
     Automatically configures:
-    - Alacritty with Tokyo Night theme & direct WSL shell integration.
+    - Alacritty with Nord theme & direct WSL shell integration.
+    - Visual Studio Code with Nord theme & WSL remote extension.
     - WSL 2 performance & memory cap via .wslconfig.
 .NOTES
     Run from PowerShell (no administrator privileges strictly required unless WinGet prompts).
@@ -17,12 +18,12 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  🚀 Windows Setup: Alacritty + WSL Tools                   " -ForegroundColor Cyan
+Write-Host "  🚀 Windows Setup: Alacritty + VS Code + WSL Tools (Nord)  " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Check WinGet availability
-Write-Host "[1/5] Checking WinGet package manager..." -ForegroundColor Yellow
+Write-Host "[1/6] Checking WinGet package manager..." -ForegroundColor Yellow
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Error "WinGet is not available on this system. Please install 'App Installer' from the Microsoft Store or update Windows 10/11."
     exit 1
@@ -72,17 +73,22 @@ function Install-WingetApp {
 
 # 2. Install Alacritty
 Write-Host ""
-Write-Host "[2/5] Installing Alacritty GPU-accelerated Terminal..." -ForegroundColor Yellow
+Write-Host "[2/6] Installing Alacritty GPU-accelerated Terminal..." -ForegroundColor Yellow
 Install-WingetApp -PackageId "Alacritty.Alacritty" -DisplayName "Alacritty"
 
 # 3. Install JetBrainsMono Nerd Font
 Write-Host ""
-Write-Host "[3/5] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
+Write-Host "[3/6] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
 Install-WingetApp -PackageId "DEVCOM.JetBrainsMonoNerdFont" -DisplayName "JetBrainsMono Nerd Font" -FallbackId "JetBrains.JetBrainsMono.NerdFont"
 
-# 4. Configure Alacritty
+# 4. Install Visual Studio Code
 Write-Host ""
-Write-Host "[4/5] Configuring Alacritty for WSL & Tokyo Night Theme..." -ForegroundColor Yellow
+Write-Host "[4/6] Installing Visual Studio Code..." -ForegroundColor Yellow
+Install-WingetApp -PackageId "Microsoft.VisualStudioCode" -DisplayName "Visual Studio Code"
+
+# 5. Configure Alacritty
+Write-Host ""
+Write-Host "[5/6] Configuring Alacritty for WSL & Nord Theme..." -ForegroundColor Yellow
 
 $alacrittyConfigDir = Join-Path -Path $env:APPDATA -ChildPath "alacritty"
 if (-not (Test-Path -Path $alacrittyConfigDir)) {
@@ -168,39 +174,39 @@ history    = 10000
 multiplier = 3
 
 # ------------------------------------------------------------------------------
-# Color Scheme: Tokyo Night Dark (Consistent with Neovim & Zellij)
+# Color Scheme: Nord (Arctic, North-bluish palette)
 # ------------------------------------------------------------------------------
 [colors.primary]
-background = "#1a1b26"
-foreground = "#c0caf5"
+background = "#2e3440"
+foreground = "#d8dee9"
 
 [colors.cursor]
-text   = "#1a1b26"
-cursor = "#c0caf5"
+text   = "#2e3440"
+cursor = "#d8dee9"
 
 [colors.selection]
-background = "#283457"
-text       = "#c0caf5"
+background = "#434c5e"
+text       = "#eceff4"
 
 [colors.normal]
-black   = "#15161e"
-red     = "#f7768e"
-green   = "#9ece6a"
-yellow  = "#e0af68"
-blue    = "#7aa2f7"
-magenta = "#bb9af7"
-cyan    = "#7dcfff"
-white   = "#a9b1d6"
+black   = "#3b4252"
+red     = "#bf616a"
+green   = "#a3be8c"
+yellow  = "#ebcb8b"
+blue    = "#81a1c1"
+magenta = "#b48ead"
+cyan    = "#88c0d0"
+white   = "#e5e9f0"
 
 [colors.bright]
-black   = "#414868"
-red     = "#f7768e"
-green   = "#9ece6a"
-yellow  = "#e0af68"
-blue    = "#7aa2f7"
-magenta = "#bb9af7"
-cyan    = "#7dcfff"
-white   = "#c0caf5"
+black   = "#4c566a"
+red     = "#bf616a"
+green   = "#a3be8c"
+yellow  = "#ebcb8b"
+blue    = "#81a1c1"
+magenta = "#b48ead"
+cyan    = "#8fbcbb"
+white   = "#eceff4"
 
 # ------------------------------------------------------------------------------
 # Keybindings (Familiar copy/paste shortcuts)
@@ -218,9 +224,62 @@ bindings = [
 Set-Content -Path $alacrittyConfigFile -Value $alacrittyConfigContent -Encoding UTF8
 Write-Host "  ✓ Wrote configuration to $alacrittyConfigFile" -ForegroundColor Green
 
-# 5. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+# 6. Configure Visual Studio Code (Nord Theme & Remote WSL)
 Write-Host ""
-Write-Host "[5/5] Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
+Write-Host "[6/6] Configuring Visual Studio Code (Nord Theme & Settings)..." -ForegroundColor Yellow
+
+# Locate 'code' CLI executable
+$codeCmd = $null
+if (Get-Command code -ErrorAction SilentlyContinue) {
+    $codeCmd = "code"
+} else {
+    $possiblePaths = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\Microsoft VS Code\bin\code.cmd"),
+        (Join-Path $env:ProgramFiles "Microsoft VS Code\bin\code.cmd"),
+        (Join-Path ${env:ProgramFiles(x86)} "Microsoft VS Code\bin\code.cmd")
+    )
+    foreach ($path in $possiblePaths) {
+        if ($path -and (Test-Path -Path $path)) {
+            $codeCmd = $path
+            break
+        }
+    }
+}
+
+if ($codeCmd) {
+    Write-Host "  Installing VS Code Nord theme & Remote-WSL extensions..." -ForegroundColor DarkGray
+    Start-Process -FilePath $codeCmd -ArgumentList "--install-extension", "arcticicestudio.nord-visual-studio-code", "--force" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+    Start-Process -FilePath $codeCmd -ArgumentList "--install-extension", "ms-vscode-remote.remote-wsl", "--force" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+}
+
+# Configure VS Code settings.json
+$vscodeUserDir = Join-Path -Path $env:APPDATA -ChildPath "Code\User"
+if (-not (Test-Path -Path $vscodeUserDir)) {
+    New-Item -ItemType Directory -Path $vscodeUserDir -Force | Out-Null
+}
+$vscodeSettingsFile = Join-Path -Path $vscodeUserDir -ChildPath "settings.json"
+
+$settingsObj = [ordered]@{}
+if (Test-Path -Path $vscodeSettingsFile) {
+    try {
+        $existingSettings = Get-Content -Path $vscodeSettingsFile -Raw | ConvertFrom-Json
+        foreach ($prop in $existingSettings.PSObject.Properties) {
+            $settingsObj[$prop.Name] = $prop.Value
+        }
+    } catch {}
+}
+
+$settingsObj["workbench.colorTheme"] = "Nord"
+$settingsObj["editor.fontFamily"] = "'JetBrainsMono Nerd Font', 'JetBrains Mono', Consolas, 'Courier New', monospace"
+$settingsObj["editor.fontLigatures"] = $true
+
+$settingsJson = $settingsObj | ConvertTo-Json -Depth 10
+Set-Content -Path $vscodeSettingsFile -Value $settingsJson -Encoding UTF8
+Write-Host "  ✓ Configured Nord theme in $vscodeSettingsFile" -ForegroundColor Green
+
+# 7. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+Write-Host ""
+Write-Host "Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
 $wslConfigFile = Join-Path -Path $env:USERPROFILE -ChildPath ".wslconfig"
 if (-not (Test-Path -Path $wslConfigFile)) {
     $wslConfigContent = @'
