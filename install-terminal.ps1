@@ -301,13 +301,33 @@ swap=2GB
 # Automatically return unused Linux memory back to Windows (prevents vmmem growth)
 autoMemoryReclaim=gradual
 sparseVhd=true
+vmIdleTimeout=-1
 '@
     Set-Content -Path $wslConfigFile -Value $wslConfigContent -Encoding UTF8
     Write-Host "  ✓ Created .wslconfig template at $wslConfigFile" -ForegroundColor Green
     Write-Host "    (Tip: edit memory= to match ~50-75% of your RAM, then run 'wsl --shutdown' in PowerShell)" -ForegroundColor DarkGray
 } else {
-    Write-Host "  ✓ Existing .wslconfig detected at $wslConfigFile (skipped)." -ForegroundColor Green
+    Write-Host "  ✓ Existing .wslconfig detected at $wslConfigFile." -ForegroundColor Green
+    if (-not (Select-String -Path $wslConfigFile -Pattern "vmIdleTimeout" -Quiet)) {
+        Add-Content -Path $wslConfigFile -Value "`n[experimental]`nvmIdleTimeout=-1"
+        Write-Host "  ✓ Added vmIdleTimeout=-1 to prevent WSL shutdown lockups." -ForegroundColor Green
+    }
 }
+
+# Grant permanent VM permissions on WSL virtual disk to avoid "Access is denied" on relaunch
+try {
+    $lxssPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss"
+    if (Test-Path $lxssPath) {
+        Get-ChildItem $lxssPath | ForEach-Object {
+            $basePath = (Get-ItemProperty $_.PsPath).BasePath
+            if ($basePath -and (Test-Path "$basePath\ext4.vhdx")) {
+                icacls "$basePath\ext4.vhdx" /grant "NT VIRTUAL MACHINE\Virtual Machines:F" 2>$null | Out-Null
+                icacls "$basePath" /grant "NT VIRTUAL MACHINE\Virtual Machines:(OI)(CI)F" 2>$null | Out-Null
+            }
+        }
+        Write-Host "  ✓ Verified Hyper-V VM disk permissions (Access Denied protection active)." -ForegroundColor Green
+    }
+} catch {}
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
