@@ -11,11 +11,21 @@ sudo apt update && sudo apt install -y \
   libvips imagemagick libmagickwand-dev mupdf mupdf-tools \
   redis-tools sqlite3 libsqlite3-0 default-libmysqlclient-dev libpq-dev postgresql-client postgresql-client-common \
   curl git ripgrep fd-find unzip tar dirmngr gpg gawk \
-  xclip xsel ca-certificates lsb-release
+  wl-clipboard xclip xsel ca-certificates lsb-release
 
 # Create symlinks for Debian/Ubuntu package name quirks (fdfind -> fd, batcat -> bat)
 if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
   sudo ln -sf "$(which fdfind)" /usr/local/bin/fd
+fi
+
+# Install win32yank for reliable WSL host clipboard integration
+if ! command -v win32yank.exe &>/dev/null; then
+  echo "Installing win32yank for WSL clipboard..."
+  curl -sLo /tmp/win32yank.zip https://github.com/equalsraf/win32yank/releases/download/v0.1.1/win32yank-x64.zip
+  unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
+  chmod +x /tmp/win32yank.exe
+  sudo mv /tmp/win32yank.exe /usr/local/bin/win32yank.exe
+  rm -f /tmp/win32yank.zip
 fi
 
 echo "=== 2. Install Docker & Docker Compose (Official Docker Repo) ==="
@@ -611,6 +621,31 @@ if ! grep -q 'zoxide init bash' ~/.bashrc; then
 # =========================
 eval "$(zoxide init bash)"
 alias cd='z'
+EOF
+fi
+
+echo "=== 29. Configure WSLg Wayland Runtime Path (Fixes Clipboard & Image Paste) ==="
+if ! grep -q 'WSLg Wayland Runtime Fix' ~/.bashrc; then
+  cat <<'EOF' >>~/.bashrc
+
+# ==========================================================
+# WSLg Wayland Runtime Fix (Fixes clipboard / image paste)
+# ==========================================================
+if [ -d "/mnt/wslg/runtime-dir" ]; then
+  export XDG_RUNTIME_DIR="/mnt/wslg/runtime-dir"
+  export WAYLAND_DISPLAY="wayland-0"
+fi
+EOF
+fi
+
+if [ -f ~/.profile ] && ! grep -q 'WSLg Wayland Runtime Fix' ~/.profile; then
+  cat <<'EOF' >>~/.profile
+
+# WSLg Wayland Runtime Fix
+if [ -d "/mnt/wslg/runtime-dir" ]; then
+  export XDG_RUNTIME_DIR="/mnt/wslg/runtime-dir"
+  export WAYLAND_DISPLAY="wayland-0"
+fi
 EOF
 fi
 
