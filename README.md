@@ -458,28 +458,35 @@ else
   echo "9router is already installed."
 fi
 
-# Configure 9router systemd user service to auto-start on boot
-mkdir -p ~/.config/systemd/user
-cat <<'EOF' >~/.config/systemd/user/9router.service
+# Configure 9router system-level systemd service to auto-start on WSL boot
+sudo tee /etc/systemd/system/9router.service >/dev/null <<EOF
 [Unit]
 Description=9router AI Gateway
 After=network.target
 
 [Service]
 Type=simple
-Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:%h/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=%h/.local/bin/mise exec -- 9router --tray --no-browser --skip-update
+User=$USER
+Group=$USER
+WorkingDirectory=$HOME
+Environment=HOME=$HOME
+Environment=PATH=$HOME/.local/share/mise/shims:$HOME/.local/bin:$HOME/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=$HOME/.local/bin/mise exec -- 9router --tray --no-browser --skip-update
 Restart=always
 RestartSec=5
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 EOF
 
-systemctl --user daemon-reload 2>/dev/null || true
-systemctl --user enable 9router.service 2>/dev/null || true
-systemctl --user restart 9router.service 2>/dev/null || true
-sudo loginctl enable-linger "$USER" 2>/dev/null || true
+# Clean up obsolete user-level service if present
+systemctl --user stop 9router.service 2>/dev/null || true
+systemctl --user disable 9router.service 2>/dev/null || true
+rm -f ~/.config/systemd/user/9router.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable 9router.service
+sudo systemctl restart 9router.service
 
 echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
 if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
