@@ -45,21 +45,29 @@ def get_connection():
     return sock, reader
 
 def rpc_call(method, params=None):
-    s, r = get_connection()
-    payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}}
-    s.sendall((json.dumps(payload) + "\n").encode())
-    while True:
-        line = r.readline()
-        if not line:
+    for attempt in range(2):
+        try:
+            s, r = get_connection()
+            payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}}
+            s.sendall((json.dumps(payload) + "\n").encode())
+            while True:
+                line = r.readline()
+                if not line:
+                    raise ConnectionError("Concat socket closed or app quit")
+                msg = json.loads(line)
+                if msg.get("id") == 1:
+                    if "error" in msg:
+                        raise RuntimeError(msg["error"].get("message", "RPC error"))
+                    return msg.get("result", {})
+        except Exception as e:
             global sock, reader
+            if sock:
+                try: sock.close()
+                except Exception: pass
             sock = None
             reader = None
-            raise ConnectionError("Concat socket closed or app quit")
-        msg = json.loads(line)
-        if msg.get("id") == 1:
-            if "error" in msg:
-                raise RuntimeError(msg["error"].get("message", "RPC error"))
-            return msg.get("result", {})
+            if attempt == 1:
+                raise e
 
 TOOLS = [
     {
