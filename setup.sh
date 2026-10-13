@@ -286,6 +286,10 @@ try:
 except Exception: pass
 " 2>/dev/null || true
       fi
+      if [ -f "$SCRIPT_DIR/configs/concat_rules.md" ]; then
+        mkdir -p "$HOME/.config/opencode"
+        cp "$SCRIPT_DIR/configs/concat_rules.md" "$HOME/.config/opencode/concat_rules.md" 2>/dev/null || true
+      fi
       OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
       if [ -f "$OPENCODE_CONFIG" ] && [ -n "$WIN_PY_PATH" ]; then
         python3 -c "
@@ -302,7 +306,11 @@ try:
             'command': [win_py_wsl, '$WIN_USERPROFILE\\\\concat_mcp.py'],
             'environment': {'CONCAT_TOKEN': 'kucing123'}
         }
-        with open('$OPENCODE_CONFIG', 'w') as f: json.dump(d, f, indent=2)
+    inst = d.setdefault('instructions', [])
+    rule_path = '$HOME/.config/opencode/concat_rules.md'
+    if rule_path not in inst:
+        inst.append(rule_path)
+    with open('$OPENCODE_CONFIG', 'w') as f: json.dump(d, f, indent=2)
 except Exception: pass
 " 2>/dev/null || true
       fi
