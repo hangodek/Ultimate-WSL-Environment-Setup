@@ -46,3 +46,18 @@ Setiap klip greenscreen WAJIB menggunakan parameter ini agar tidak ada artefak h
   Alih-alih 1 video monoton selama 5 detik, buat variasi cut-to-cut (misal 2 detik buang muka -> cut ke 2 detik natap tajam/melotot).
 - **Karakterisasi Dinamis berdasarkan Momen Klip:**
   Perhatikan perubahan emosi di dalam satu file (contoh: `Black cat shaking its head` awal = bengong/bingung, tengah/akhir = marah/ngegas). Gunakan detik awal saat butuh reaksi bodoh/blank, dan detik tengah saat butuh reaksi marah.
+
+## 6. Audio Rules & Volume Handling (PENTING)
+- **Pertahankan Audio / Sound Effect Asli (`volume: 1.0`):**
+  - Klip vokal/dialog: `cat-talking-*`, `cats-talking-*`, `cat-i-go-meow`.
+  - Klip reaksi suara iconic: `cat-laughing-*`, `cat-huh`, `cat-happy-happy-happy`, `cat-oi-oi-oi`, `cat-eyebrow-vine-boom`, `cat-screaming-*`, `cat-crunchy-luna`, `cat-pop`, `banana-cat-crying`, `cat-sad-meowing-*`.
+  - **Pengecualian khusus permintaan user (BGM/Suara tetap ON):**
+    - `cat-sleeping.mp4`
+    - `cat-black-zoning-out.mp4` (lagu bengong/dimarahin iconic)
+    - `cat-reading-book.mp4`
+    - `banana-cat-spinning.mp4`
+    - `cat-clapping.mp4`
+- **Otomatis Mute (`volume: 0.0`):**
+  - Klip reaksi visual pasif lainnya yang punya suara noise/BGM bertabrakan saat jadi karakter pendengar/nyimak:
+    `cat-smiling-camera`, `cat-dilated-pupils`, `cat-bored`, `cat-sleepy`, `cat-lying-thinking`, `cat-in-sock`, `cat-ginger-waiting`, `cat-wet-staring`, `cat-orange-looks-around`, `cat-dancing-wop`, dll.
+  - Setiap kali klip ini dipakai sebagai pendengar/reaksi pasif yang tidak butuh audio bawaannya, wajib di-set `volume: 0.0`.
