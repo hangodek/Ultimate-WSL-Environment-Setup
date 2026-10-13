@@ -4,6 +4,7 @@
 - **Resolution:** 1080x1920 (9:16 Vertical for Shorts/TikTok/Reels), 30 fps unless requested otherwise.
 - **Project Directory:** `C:\Users\icyfa\Desktop\Concat\<ProjectName>`
 - **Asset Source:** `E:\Godek\Bahan Video\` (e.g. `Kucing/`, `Gambar/`, `Meme/`).
+- **Asset Catalog:** Gunakan index `E:\Godek\Bahan Video\Kucing\README.md` untuk memilih nama file video kucing berdasarkan emosi (marah, sedih, senang, ngomong, dll).
 
 ## 2. Track Hierarchy
 - **Track T1 (Background):** Gambar latar (e.g. `Park.jpg`) atau video background. Durasi disesuaikan dengan total durasi scene.
