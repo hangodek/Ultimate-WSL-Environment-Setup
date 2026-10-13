@@ -35,3 +35,13 @@ Setiap klip greenscreen WAJIB menggunakan parameter ini agar tidak ada artefak h
 5. Terapkan `concat.chroma-key` standar pada semua klip foreground.
 6. Simpan otomatis dengan `project.save`.
 7. Render frame preview (`preview.frame`) untuk inspeksi visual sebelum final export.
+
+## 5. Granular Clip Trimming & Dynamic Expressions (PENTING)
+- **Hindari pakai video greenscreen dari awal sampai habis (full length):**
+  Banyak video meme memiliki zoom-in/out mendadak atau gerakan kamera bawaan kreator aslinya.
+- **Ambil potongan spesifik (Micro-cuts 1–3 detik):**
+  Gunakan `sourceStart` dan `trimClip` untuk memotong HANYA bagian ekspresi yang stabil, bersih, dan sesuai emosi adegan.
+- **Variasikan Reaksi (Multi-cut per Adegan):**
+  Alih-alih 1 video monoton selama 5 detik, buat variasi cut-to-cut (misal 2 detik buang muka -> cut ke 2 detik natap tajam/melotot).
+- **Karakterisasi Dinamis berdasarkan Momen Klip:**
+  Perhatikan perubahan emosi di dalam satu file (contoh: `Black cat shaking its head` awal = bengong/bingung, tengah/akhir = marah/ngegas). Gunakan detik awal saat butuh reaksi bodoh/blank, dan detik tengah saat butuh reaksi marah.
