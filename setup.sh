@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
 export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
 
@@ -262,6 +264,50 @@ export PATH="$HOME/.opencode/bin:$PATH"
 alias oc='opencode'
 alias oca='opencode --auto'
 EOF
+fi
+
+# Deploy Concat Video Editor MCP Bridge for OpenCode
+if command -v powershell.exe &>/dev/null; then
+  WIN_USERPROFILE=$(powershell.exe -NoProfile -Command "Write-Output \$env:USERPROFILE" 2>/dev/null | tr -d '\r')
+  if [ -n "$WIN_USERPROFILE" ]; then
+    WIN_USERDIR=$(wslpath "$WIN_USERPROFILE" 2>/dev/null)
+    WIN_PY_PATH=$(powershell.exe -NoProfile -Command "(Get-Command python.exe -ErrorAction SilentlyContinue).Source" 2>/dev/null | tr -d '\r')
+    if [ -d "$WIN_USERDIR" ] && [ -f "$SCRIPT_DIR/scripts/concat_mcp.py" ]; then
+      cp "$SCRIPT_DIR/scripts/concat_mcp.py" "$WIN_USERDIR/concat_mcp.py" 2>/dev/null || true
+      WIN_CONCAT_SETTINGS="$WIN_USERDIR/AppData/Roaming/app.concat.editor/settings.json"
+      if [ -f "$WIN_CONCAT_SETTINGS" ]; then
+        python3 -c "
+import json
+try:
+    with open('$WIN_CONCAT_SETTINGS', 'r') as f: d = json.load(f)
+    if not d.get('server', {}).get('token'):
+        d.setdefault('server', {})['token'] = 'eaa78cabcb2ece2186ab8ec3c424cebe'
+        with open('$WIN_CONCAT_SETTINGS', 'w') as f: json.dump(d, f, indent=2)
+except Exception: pass
+" 2>/dev/null || true
+      fi
+      OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
+      if [ -f "$OPENCODE_CONFIG" ] && [ -n "$WIN_PY_PATH" ]; then
+        python3 -c "
+import json, subprocess
+try:
+    with open('$OPENCODE_CONFIG', 'r') as f: d = json.load(f)
+    mcp = d.setdefault('mcp', {})
+    if 'concat' not in mcp:
+        win_py_wsl = '$WIN_PY_PATH'
+        try: win_py_wsl = subprocess.check_output(['wslpath', '$WIN_PY_PATH']).decode().strip()
+        except Exception: pass
+        mcp['concat'] = {
+            'type': 'local',
+            'command': [win_py_wsl, '$WIN_USERPROFILE\\\\concat_mcp.py'],
+            'environment': {'CONCAT_TOKEN': 'eaa78cabcb2ece2186ab8ec3c424cebe'}
+        }
+        with open('$OPENCODE_CONFIG', 'w') as f: json.dump(d, f, indent=2)
+except Exception: pass
+" 2>/dev/null || true
+      fi
+    fi
+  fi
 fi
 
 echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
