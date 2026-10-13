@@ -14,7 +14,7 @@ def get_token():
                     return t
     except Exception:
         pass
-    return "eaa78cabcb2ece2186ab8ec3c424cebe"
+    return "kucing123"
 
 TOKEN = get_token()
 HOST = os.getenv("CONCAT_HOST", "127.0.0.1")

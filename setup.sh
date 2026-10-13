@@ -281,7 +281,7 @@ import json
 try:
     with open('$WIN_CONCAT_SETTINGS', 'r') as f: d = json.load(f)
     if not d.get('server', {}).get('token'):
-        d.setdefault('server', {})['token'] = 'eaa78cabcb2ece2186ab8ec3c424cebe'
+        d.setdefault('server', {})['token'] = 'kucing123'
         with open('$WIN_CONCAT_SETTINGS', 'w') as f: json.dump(d, f, indent=2)
 except Exception: pass
 " 2>/dev/null || true
@@ -300,7 +300,7 @@ try:
         mcp['concat'] = {
             'type': 'local',
             'command': [win_py_wsl, '$WIN_USERPROFILE\\\\concat_mcp.py'],
-            'environment': {'CONCAT_TOKEN': 'eaa78cabcb2ece2186ab8ec3c424cebe'}
+            'environment': {'CONCAT_TOKEN': 'kucing123'}
         }
         with open('$OPENCODE_CONFIG', 'w') as f: json.dump(d, f, indent=2)
 except Exception: pass
