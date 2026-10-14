@@ -4,16 +4,25 @@ def get_token():
     env_token = os.getenv("CONCAT_TOKEN")
     if env_token:
         return env_token
-    try:
-        appdata = os.getenv("APPDATA") or os.path.expanduser("~/AppData/Roaming")
-        settings_path = os.path.join(appdata, "app.concat.editor", "settings.json")
-        if os.path.exists(settings_path):
-            with open(settings_path, "r", encoding="utf-8") as f:
-                t = json.load(f).get("server", {}).get("token")
-                if t:
-                    return t
-    except Exception:
-        pass
+
+    candidate_paths = [
+        os.path.expanduser("~/.config/app.concat.editor/settings.json"),
+        os.path.join(os.getenv("APPDATA", ""), "app.concat.editor", "settings.json") if os.getenv("APPDATA") else None,
+        os.path.expanduser("~/AppData/Roaming/app.concat.editor/settings.json"),
+    ]
+
+    for p in candidate_paths:
+        if not p:
+            continue
+        try:
+            if os.path.exists(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    tok = json.load(f).get("server", {}).get("token")
+                    if tok:
+                        return tok
+        except Exception:
+            continue
+
     return "kucing123"
 
 TOKEN = get_token()

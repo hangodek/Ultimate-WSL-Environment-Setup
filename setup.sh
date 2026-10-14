@@ -316,6 +316,53 @@ except Exception: pass
       fi
     fi
   fi
+else
+  # Native Linux Ubuntu environment
+  if [ -f "$SCRIPT_DIR/configs/concat_rules.md" ]; then
+    mkdir -p "$HOME/.config/opencode"
+    cp "$SCRIPT_DIR/configs/concat_rules.md" "$HOME/.config/opencode/concat_rules.md" 2>/dev/null || true
+  fi
+
+  LINUX_CONCAT_DIR="$HOME/.config/app.concat.editor"
+  LINUX_CONCAT_SETTINGS="$LINUX_CONCAT_DIR/settings.json"
+  mkdir -p "$LINUX_CONCAT_DIR"
+  python3 -c "
+import json, os
+p = '$LINUX_CONCAT_SETTINGS'
+d = {}
+if os.path.exists(p):
+    try:
+        with open(p, 'r', encoding='utf-8') as f: d = json.load(f)
+    except Exception: d = {}
+if not d.get('server', {}).get('token'):
+    d.setdefault('server', {})['token'] = 'kucing123'
+    try:
+        with open(p, 'w', encoding='utf-8') as f: json.dump(d, f, indent=2)
+    except Exception: pass
+" 2>/dev/null || true
+
+  OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
+  if [ -f "$OPENCODE_CONFIG" ] && [ -f "$SCRIPT_DIR/scripts/concat_mcp.py" ]; then
+    python3 -c "
+import json
+p = '$OPENCODE_CONFIG'
+try:
+    with open(p, 'r', encoding='utf-8') as f: d = json.load(f)
+    mcp = d.setdefault('mcp', {})
+    if 'concat' not in mcp:
+        mcp['concat'] = {
+            'type': 'local',
+            'command': ['python3', '$SCRIPT_DIR/scripts/concat_mcp.py'],
+            'environment': {'CONCAT_TOKEN': 'kucing123'}
+        }
+    inst = d.setdefault('instructions', [])
+    rule_path = '$HOME/.config/opencode/concat_rules.md'
+    if rule_path not in inst:
+        inst.append(rule_path)
+    with open(p, 'w', encoding='utf-8') as f: json.dump(d, f, indent=2)
+except Exception: pass
+" 2>/dev/null || true
+  fi
 fi
 
 echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
