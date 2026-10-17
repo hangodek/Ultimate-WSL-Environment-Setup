@@ -1,23 +1,25 @@
-# 🚀 Ultimate WSL Development Environment
+# 🚀 Ultimate WSL 2 Development Environment
 
 > [!NOTE]
-> ✅ **Verified & Tested**: This entire setup has been tested and is fully functional on the current Linux version (WSL 2 on Ubuntu 24.04 LTS / 22.04 LTS & Debian).
+> ✅ **Verified & Tested**: This entire setup has been tested and is fully functional on WSL 2 (Ubuntu 24.04 LTS / 22.04 LTS & Debian) paired with Windows 11 / 10.
 
-An automated, two-part setup to give you a **99% bare-metal Linux experience** inside Windows Subsystem for Linux (WSL 2) with zero lag, GPU-accelerated rendering, smart terminal navigation, and a gorgeous unified **Nord** arctic aesthetic.
+An automated, two-part setup to give you a **high-performance, VS Code-centric development environment** inside Windows Subsystem for Linux (WSL 2). Combines the full graphical power of Visual Studio Code on Windows with the speed, toolchain versatility, and modern CLI tools of bare-metal Linux in a unified **Nord** arctic aesthetic.
 
-Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
-- **GPU-Accelerated Window**: Replaces sluggish Windows Terminal with **Alacritty**.
-- **Modern GUI Editor**: Pre-configured **Visual Studio Code** on Windows with Nord theme & Remote-WSL extension.
-- **Modern Multiplexer**: Pre-configured **Zellij** for tabs, panes, floating terminals, and session persistence (Nord theme).
-- **Starship Prompt**: Instantaneous, informative prompt with git status and Nord theme.
-- **Fuzzy Search Everywhere**: **fzf** for history (`Ctrl+R`), files (`Ctrl+T`), and directories (`Alt+C`) with Nord colors.
-- **Smart Directory Jumping**: **zoxide** (`z`) learns your most frequent directories.
-- **Modern Coreutils**: **eza** (icon & git-aware `ls`), **bat** (Nord syntax-highlighted `cat`), and **git-delta** (Nord diffs).
-- **TUI Git & Docker**: **lazygit** (integrated with LazyVim via `<leader>gg`) and **lazydocker**.
-- **AI Tooling Built-in**: **Antigravity CLI** (`agy` / `agyd`), **OpenCode** (`opencode` / `oc` / `oca`), and **9router** AI gateway (systemd auto-start on boot).
-- **Unified Nord Theme**: Seamless arctic colors across Alacritty, VS Code, Zellij, Neovim (LazyVim), fzf, Starship, bat, and delta.
-- **RAM-Efficient WSL 2**: Auto-generated `.wslconfig` memory limits and on-demand Docker databases.
-- **True Clipboard Sync**: Native copy/paste across Windows and Linux.
+---
+
+## 🌟 Highlights
+
+- **Modern GUI IDE**: Pre-configured **Visual Studio Code** on Windows connected directly to WSL 2 via the official `Remote - WSL` extension with zero file-system latency.
+- **Unified Nord Arctic Theme**: Seamless color harmony across VS Code, integrated terminal, Starship prompt, `bat`, `fzf`, `git-delta`, and Zellij.
+- **Starship Prompt**: Instantaneous, informative prompt with git branch, dirty status, execution duration, and runtime version indicators (Node, Go, Ruby, Docker).
+- **Fuzzy Search Everywhere**: **fzf** for history search (`Ctrl+R`), interactive file selection (`Ctrl+T`), and smart directory navigation (`Alt+C`).
+- **Smart Directory Jumping**: **zoxide** (`z <folder>`) automatically learns your frequent directories.
+- **Modern Linux Coreutils**: **eza** (icon & git-aware `ls`), **bat** (Nord syntax-highlighted `cat`), and **git-delta** (Nord syntax diffs).
+- **TUI Git & Docker**: **lazygit** for lightning-fast Git workflows and **lazydocker** for container operations right in your terminal.
+- **AI Tooling Built-in**: **Antigravity CLI** (`agy` / `agyd`), **OpenCode** (`opencode` / `oc` / `oca`), and **9router** AI gateway running as a systemd service.
+- **Polyglot Runtime Manager**: **mise** managing global and project-specific versions of Node.js LTS, Go, and Ruby on Rails.
+- **RAM-Efficient WSL 2**: Auto-configured `.wslconfig` memory limits (8GB cap, `autoMemoryReclaim`) and on-demand Docker databases (PostgreSQL, MySQL, Redis).
+- **True Clipboard Integration**: Native copy/paste across Windows and Linux via `win32yank` and WSLg runtime fixes.
 
 ---
 
@@ -27,66 +29,69 @@ Inspired by **Omakub** (by DHH), but heavily optimized for Windows + WSL 2:
 ┌────────────────────────────────────────────────────────────────────────┐
 │  Windows 11 / 10 Host                                                  │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │  Alacritty Terminal (GPU-Accelerated) & VS Code                  │  │
-│  │  • JetBrainsMono Nerd Font                                       │  │
-│  │  • Nord Arctic Color Scheme                                      │  │
-│  │  • Directly launches `wsl.exe --cd ~`                            │  │
-│  │  • RAM Limit configured in `%USERPROFILE%\.wslconfig`             │  │
+│  │  Visual Studio Code (Primary IDE)                                │  │
+│  │  • Remote - WSL Extension (Native Linux filesystem speed)       │  │
+│  │  • JetBrainsMono Nerd Font with Font Ligatures                   │  │
+│  │  • Unified Nord Theme (Arctic blue color palette)                │  │
+│  │  • Curated Dev Extensions (GitLens, Docker, Prettier, ErrorLens) │  │
+│  │  • Integrated Terminal configured with Nord colors               │  │
 │  └─────────────────────────────────┬────────────────────────────────┘  │
+│  • Memory Cap configured in %USERPROFILE%\.wslconfig (8GB)             │
+│  • Optional: Alacritty GPU-accelerated terminal companion              │
 └────────────────────────────────────┼───────────────────────────────────┘
-                                     │ (Zero Latency)
+                                     │ (WSL Remote Bridge / IPC)
 ┌────────────────────────────────────▼───────────────────────────────────┐
-│  WSL 2 (Ubuntu / Debian)                                               │
+│  WSL 2 (Ubuntu 24.04 / Debian)                                         │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │  Zellij Workspace Multiplexer (Auto-starts)                       │  │
-│  │  ┌──────────────────────────────┐  ┌───────────────────────────┐ │  │
-│  │  │ Tab 1: Editor                │  │ Tab 2: Shell & Servers    │ │  │
-│  │  │ • Neovim (LazyVim + Nord)    │  │ • Starship (Nord Theme)   │ │  │
-│  │  │ • lazygit (<leader>gg)       │  │ • fzf (Ctrl+R / Ctrl+T)   │ │  │
-│  │  │ • Antigravity / OpenCode     │  │ • zoxide (z project)      │ │  │
-│  │  └──────────────────────────────┘  └───────────────────────────┘ │  │
+│  │  Linux Shell (VS Code Integrated Terminal / Standalone)          │  │
+│  │  • Starship Prompt (Nord theme, git status, runtime versions)   │  │
+│  │  • fzf (Ctrl+R history, Ctrl+T files, Alt+C dirs)                │  │
+│  │  • Modern CLI: eza (ls), bat (cat), zoxide (z), git-delta       │  │
+│  │  • TUI Tools: lazygit (Git), lazydocker (Docker), gh CLI         │  │
+│  │  • AI CLI Suite: Antigravity (agy), OpenCode (oc), 9router       │  │
+│  │  • Version Manager (mise): Node.js, Go, Ruby on Rails            │  │
+│  │  • On-Demand Docker DBs: Postgres 16, MySQL 8.4, Redis 7         │  │
+│  │  • Optional Multiplexer: Zellij on-demand (`zellij`)             │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
-│  • mise (Node.js, Go, Ruby, Rails)                                     │
-│  • Docker On-Demand DBs (PostgreSQL 16, MySQL 8.4, Redis 7)            │
-│  • eza (ls) • bat (cat) • git-delta (diff) • lazydocker • gh CLI       │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ Quick Start (2-Step Installation)
+## ⚡ Quick Start (2 Steps)
 
-### Step 1: Run Terminal Installer on Windows (PowerShell)
+### Step 1: Run Windows Setup (Host Configuration)
 
 Choose either of these easy methods on Windows:
 
-#### Method A: Double-Click or run `install.bat` (Easiest)
-Simply **double-click** `install.bat` in Windows File Explorer (or run `.\install.bat` in Command Prompt/PowerShell). It automatically handles ExecutionPolicy bypass for you.
+#### Method A: Double-Click `install.bat` (Easiest)
+Simply **double-click** `install.bat` in Windows File Explorer (or run `.\install.bat` in Command Prompt / PowerShell). It automatically handles ExecutionPolicy bypass for you.
 
 #### Method B: Single PowerShell One-Liner (No download required)
-Open **PowerShell** and paste:
+Open **PowerShell** on Windows and run:
 ```powershell
 irm https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/install-terminal.ps1 | iex
 ```
 
-#### Method C: Manual PowerShell Script
+#### Method C: Manual PowerShell Execution
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 ```
 
-> **What this does:**
-> 1. Installs **Alacritty**, **Visual Studio Code**, and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
-> 2. Auto-generates `%APPDATA%\alacritty\alacritty.toml` configured with Nord theme colors, Nerd Font glyphs, and auto-launching into WSL `~`.
-> 3. Configures **Visual Studio Code** with the **Nord** color theme and Remote-WSL extension.
-> 4. Creates `%USERPROFILE%\.wslconfig` with RAM limits and `autoMemoryReclaim` to keep Windows snappy.
+> **What this does on Windows:**
+> 1. Installs **Visual Studio Code** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
+> 2. Automatically installs essential VS Code extensions (`Remote - WSL`, `Nord Theme`, `GitLens`, `Docker`, `Prettier`, `ErrorLens`).
+> 3. Configures `%APPDATA%\Code\User\settings.json` with Nord colors, font ligatures, format on save, and terminal styling.
+> 4. Generates `%USERPROFILE%\.wslconfig` with memory caps (8GB limit, `autoMemoryReclaim = gradual`, `vmIdleTimeout = -1`).
+> 5. Configures **Alacritty** as an optional standalone GPU terminal companion.
 
 ---
 
-### Step 2: Run Environment Setup inside WSL (Linux)
+### Step 2: Run Linux Setup inside WSL
 
-Launch your new **Alacritty** terminal (or open any WSL shell) and choose either method:
+Open any WSL terminal (or Windows Terminal running Ubuntu) and run:
 
-#### Method A: Single Linux One-Liner (No repo cloning needed)
+#### Method A: Single Linux One-Liner (Recommended)
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/setup.sh)"
 ```
@@ -97,723 +102,114 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
----
-
-## ✨ Features & Stack
-
-| Component | Tool | Description |
-| :--- | :--- | :--- |
-| **Terminal Emulator** | **Alacritty** | GPU-accelerated, ultra-fast rendering on Windows host (Nord theme). |
-| **GUI Code Editor** | **Visual Studio Code** | Windows IDE with Nord theme, JetBrainsMono NF, and Remote-WSL extension. |
-| **Multiplexer** | **Zellij** | Intuitive terminal workspace with panes, tabs, floating windows (Nord theme). |
-| **Prompt** | **Starship** | Blazing-fast prompt with Nord theme, git status, and runtime versions. |
-| **Fuzzy Finder** | **fzf** | Interactive search with Nord palette (`Ctrl+R`, `Ctrl+T`, `Alt+C`). |
-| **Smart cd** | **zoxide** | Jump to frequent directories instantly using `z <folder>`. |
-| **Modern ls** | **eza** | Replaces `ls` with icons, file permissions, git status, and tree views. |
-| **Modern cat** | **bat** | Syntax-highlighted file viewing with Nord theme and git diff gutters. |
-| **Git Diff Pager** | **git-delta** | Syntax-highlighted, side-by-side git diffs with Nord styling. |
-| **Git & Docker TUIs** | **lazygit / lazydocker** | Full keyboard-driven TUI clients for git management and container control. |
-| **AI Assistants** | **Antigravity / OpenCode** | Built-in CLI coding assistants with shortcuts (`agyd`, `opencode`, `oc`, `oca`). |
-| **AI Gateway** | **9router** | Local proxy for fallback routing and token compression (auto-starts on boot via systemd). |
-| **Typography** | **JetBrainsMono NF** | Crisp font with full Nerd Font symbol & powerline glyph support. |
-| **Editor** | **Neovim + LazyVim** | Modern IDE experience with **Nord theme** (animations disabled, clean picker, full LSP). |
-| **Shell Experience**| **Readline / Bash** | Smart case-insensitive tab completion + 100k deduplicated command history. |
-| **Version Manager**| **mise** | Blazing-fast runtime manager for Node.js, Go, Ruby, Python, and more. |
-| **Containers** | **Docker Engine** | Official Docker CE daemon & Compose plugin. |
-| **Databases** | **Docker Profiles** | Instant PostgreSQL 16, MySQL 8.4, and Redis 7 on `127.0.0.1` without passwords. |
-| **Theme** | **Nord** | Unified arctic aesthetic across Alacritty, VS Code, Zellij, Neovim, fzf, Starship, bat, and delta. |
+> **What this does inside WSL:**
+> 1. Updates base packages and installs essential build tools and libraries.
+> 2. Configures Docker CE official repository & Docker compose.
+> 3. Sets up on-demand Docker Compose databases (PostgreSQL 16, MySQL 8.4, Redis 7).
+> 4. Installs `mise` and provisions Node.js (LTS), Go (latest), and Ruby with Rails.
+> 5. Installs modern CLI tools: `starship`, `zoxide`, `fzf`, `eza`, `bat`, `lazygit`, `lazydocker`, `gh`, and `git-delta`.
+> 6. Installs and configures AI tools: `agy` (Antigravity CLI), `opencode`, Concat MCP bridge, and `9router` systemd service.
+> 7. Configures case-insensitive bash tab completion, high-capacity bash history, and SSH agent auto-start.
 
 ---
 
-## ⌨️ Shortcuts & Cheatsheet
+## 💻 Daily Workflow & Commands
 
-### Windows & Terminal Shortcuts
-| Shortcut | Tool | Action & Behavior |
-| :--- | :--- | :--- |
-| **`Ctrl + Shift + C`** | **Alacritty** | Copy selected text to clipboard. |
-| **`Ctrl + Shift + V`** | **Alacritty** | Paste from clipboard. |
-| **`Ctrl + Plus (+)`** | **Alacritty** | Increase font size. |
-| **`Ctrl + Minus (-)`** | **Alacritty** | Decrease font size. |
-| **`Ctrl + 0`** | **Alacritty** | Reset font size to default. |
-
-### Shell Navigation & Fuzzy Find
-| Shortcut / Command | Tool | Action |
-| :--- | :--- | :--- |
-| `Ctrl + r` | **fzf** | Fuzzy search command history |
-| `Ctrl + t` | **fzf** | Fuzzy search files in current directory |
-| `Alt + c` | **fzf** | Fuzzy search subdirectories to `cd` into |
-| `z <name>` | **zoxide** | Jump to any matching directory (e.g. `z setup`) |
-| `zi` | **zoxide + fzf** | Interactive fuzzy directory selection |
-| `ls` / `ll` / `la` / `lt` | **eza** | Icon-enhanced list, long list, all files, and tree view |
-| `cat <file>` / `bat <file>` | **bat** | Syntax-highlighted file contents |
-
-### Zellij (WSL Multiplexer)
-| Shortcut | Mode | Description |
-| :--- | :--- | :--- |
-| `Ctrl + p` | **Pane mode** | Press `n` for new pane, `x` to close, `f` to fullscreen |
-| `Ctrl + t` | **Tab mode** | Press `n` for new tab, `x` to close, `[` / `]` to switch tabs |
-| `Ctrl + s` | **Scroll mode** | Search text (`/`), scroll history with `j`/`k` or mouse wheel |
-| `Ctrl + o` | **Session mode** | Press `d` to detach session, `w` to switch session |
-| `Alt + n` | **Quick Pane** | Open a new pane directly |
-| `Alt + [` / `Alt + ]` | **Quick Tab** | Cycle through open tabs |
-
----
-
-## 🛠️ Custom Terminal Aliases
-
-### 1. Editor, AI & Core Tools
-
-| Alias | Command | Description | Usage Examples |
-| :--- | :--- | :--- | :--- |
-| **`upd`** | `sudo apt update && sudo apt upgrade` | Update package index and upgrade all system packages. | • `upd` |
-| **`n`** | `nvim` | Shortcut to open Neovim editor. | • `n .`<br>• `n app/models/user.rb` |
-| **`agyd`** | `agy --dangerously-skip-permissions` | Launch Antigravity assistant in trusted/yolo mode. | • `agyd` |
-| **`oc`** | `opencode` | Shortcut for OpenCode AI assistant. | • `oc` |
-| **`oca`** | `opencode --auto` | Run OpenCode in autonomous execution mode. | • `oca` |
-| **`r`** | `rails` | Shortcut for Ruby on Rails CLI. | • `r s`<br>• `r c`<br>• `r g migration CreateUsers` |
-| **`cd`** | `z` | Auto-routed to zoxide smart directory jumper. | • `cd my-project` |
-| **`ls`** | `eza --icons ...` | Modern icon-aware file listing. | • `ls`<br>• `ll` *(long)*<br>• `lt` *(tree)* |
-| **`cat`** | `batcat --paging=never` | Syntax-highlighted file display. | • `cat setup.sh` |
-
----
-
-### 2. Database On-Demand (WSL RAM Saver)
-
-Databases are managed through Docker Compose profiles. They only consume memory when actively running.
-
-| Alias | Command / Action | Description & Advantages |
-| :--- | :--- | :--- |
-| **`db-pg`** | Starts PostgreSQL & Redis | Runs PostgreSQL 16 and Redis 7 in background (`-d`). |
-| **`db-mysql`** | Starts MySQL & Redis | Runs MySQL 8.4 and Redis 7 in background (`-d`). |
-| **`db-all`** | Starts all services | Launches PostgreSQL, MySQL, and Redis simultaneously. |
-| **`db-stop`** | Stops all containers | Shuts down all active database containers to free RAM. |
-| **`db-status`** | `docker ps` | View active database containers, ports, and health status. |
-
----
-
-## 📜 Complete `setup.sh` Reference
-
+### 1. Opening Projects in VS Code
+From any directory in your WSL shell, simply run:
 ```bash
-#!/bin/bash
-set -e
-
-# Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
-export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
-
-echo "=== 1. Update System & Install Base Dependencies (Omakub + WSL Tools) ==="
-sudo apt update && sudo apt install -y \
-  build-essential pkg-config autoconf bison clang rustc pipx \
-  libssl-dev libreadline-dev zlib1g-dev libyaml-dev libncurses5-dev libffi-dev libgdbm-dev libjemalloc2 \
-  libvips imagemagick libmagickwand-dev mupdf mupdf-tools \
-  redis-tools sqlite3 libsqlite3-0 default-libmysqlclient-dev libpq-dev postgresql-client postgresql-client-common \
-  curl git ripgrep fd-find unzip tar dirmngr gpg gawk \
-  xclip xsel ca-certificates lsb-release
-
-# Create symlinks for Debian/Ubuntu package name quirks (fdfind -> fd, batcat -> bat)
-if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
-  sudo ln -sf "$(which fdfind)" /usr/local/bin/fd
-fi
-
-echo "=== 2. Install Docker & Docker Compose (Official Docker Repo) ==="
-sudo apt update
-sudo apt install -y ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-Components: stable
-Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo systemctl start docker || true
-sudo groupadd docker 2>/dev/null || true
-sudo usermod -aG docker $USER
-
-echo "=== 3. Setup Docker Containers (PostgreSQL, MySQL, Redis) ==="
-mkdir -p ~/.config/dev-services
-
-cat <<'EOF' >~/.config/dev-services/docker-compose.yml
-services:
-  postgres:
-    image: postgres:16
-    container_name: dev-postgres
-    restart: unless-stopped
-    profiles: ["pg", "all"]
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "127.0.0.1:5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  mysql:
-    image: mysql:8.4
-    container_name: dev-mysql
-    restart: unless-stopped
-    profiles: ["mysql", "all"]
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-    ports:
-      - "127.0.0.1:3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  redis:
-    image: redis:7
-    container_name: dev-redis
-    restart: unless-stopped
-    profiles: ["redis", "all"]
-    ports:
-      - "127.0.0.1:6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  mysql_data:
-  redis_data:
-EOF
-
-echo "=== 4. Install Latest Neovim (via PPA) ==="
-sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt update
-sudo apt install neovim -y
-
-echo "=== 5. Setup LazyVim ==="
-if [ -d ~/.config/nvim ] && [ -f ~/.config/nvim/init.lua ]; then
-  echo "LazyVim/Neovim configuration already exists in ~/.config/nvim (skipping clone)."
-else
-  if [ -d ~/.config/nvim ]; then
-    BACKUP_DIR=~/.config/nvim.bak.$(date +%Y%m%d%H%M%S)
-    mv ~/.config/nvim "$BACKUP_DIR"
-    echo "Backed up existing non-LazyVim nvim config to $BACKUP_DIR"
-  fi
-  git clone https://github.com/LazyVim/starter ~/.config/nvim
-  rm -rf ~/.config/nvim/.git
-fi
-
-echo "=== 6. Install mise (Version Manager) ==="
-curl https://mise.run | sh
-if ! grep -q 'mise activate bash' ~/.bashrc; then
-  echo 'eval "$(~/.local/bin/mise activate bash)"' >>~/.bashrc
-fi
-eval "$($HOME/.local/bin/mise activate bash)" || true
-
-echo "=== 7. Install Node.js, Go, and Ruby via mise ==="
-mise use --global node@lts
-mise use --global go@latest
-mise use --global ruby@latest
-
-echo "=== 8. Install Ruby on Rails ==="
-eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
-gem install rails || echo "Rails installation finished."
-
-echo "=== 9. Setup Custom Aliases ==="
-if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# Dev Custom Aliases
-# =========================
-# System & Package Management
-alias upd="sudo apt update && sudo apt upgrade"
-
-# Editor & Frameworks
-alias n="nvim"
-alias r="rails"
-
-# Database On-Demand (WSL RAM Saver)
-alias db-pg="docker compose -f ~/.config/dev-services/docker-compose.yml --profile pg --profile redis up -d"
-alias db-mysql="docker compose -f ~/.config/dev-services/docker-compose.yml --profile mysql --profile redis up -d"
-alias db-all="docker compose -f ~/.config/dev-services/docker-compose.yml --profile all up -d"
-alias db-stop="docker compose -f ~/.config/dev-services/docker-compose.yml down"
-alias db-status="docker ps"
-EOF
-fi
-
-echo "=== 10. Install Zellij (Terminal Multiplexer) ==="
-if ! command -v zellij &>/dev/null; then
-  echo "Fetching latest Zellij release for Linux..."
-  ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
-  if [ -z "$ZELLIJ_VERSION" ]; then
-    ZELLIJ_VERSION="v0.41.2"
-  fi
-  echo "Downloading Zellij ($ZELLIJ_VERSION)..."
-  curl -Lo /tmp/zellij.tar.gz "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz"
-  tar -xf /tmp/zellij.tar.gz -C /tmp/
-  chmod +x /tmp/zellij
-  sudo mv /tmp/zellij /usr/local/bin/zellij
-  rm -f /tmp/zellij.tar.gz
-  echo "Zellij installed successfully."
-else
-  echo "Zellij is already installed ($(zellij --version))."
-fi
-
-# Configure Zellij
-mkdir -p ~/.config/zellij
-cat <<'EOF' >~/.config/zellij/config.kdl
-// ==========================================================
-// Zellij Configuration — WSL Development Environment (Nord)
-// ==========================================================
-theme "nord"
-default_shell "bash"
-pane_frames false
-mouse_mode true
-copy_clipboard_on_select true
-simplified_ui false
-
-ui {
-    pane_frames {
-        rounded_corners true
-        hide_session_name false
-    }
-}
-
-themes {
-    nord {
-        fg "#d8dee9"
-        bg "#2e3440"
-        black "#3b4252"
-        red "#bf616a"
-        green "#a3be8c"
-        yellow "#ebcb8b"
-        blue "#81a1c1"
-        magenta "#b48ead"
-        cyan "#88c0d0"
-        white "#e5e9f0"
-        orange "#d08770"
-    }
-}
-EOF
-
-echo "=== 11. Configure Zellij Auto-Start in .bashrc ==="
-if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# Zellij Auto-Start
-# =========================
-# Automatically start Zellij in interactive sessions (outside nested Zellij/TMUX/VSCode)
-if command -v zellij &>/dev/null && [ -z "$ZELLIJ" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -t 1 ]; then
-    exec zellij
-fi
-EOF
-fi
-
-echo "=== 12. Install Antigravity CLI (agy) & Alias ==="
-if ! command -v agy &>/dev/null; then
-  curl -fsSL https://antigravity.google/cli/install.sh | bash || echo "Antigravity installer finished."
-else
-  echo "Antigravity CLI is already installed."
-fi
-
-if ! grep -q 'Antigravity Alias' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# Antigravity Alias
-# =========================
-alias agyd='agy --dangerously-skip-permissions'
-EOF
-fi
-
-echo "=== 13. Install OpenCode CLI & Aliases ==="
-if ! command -v opencode &>/dev/null && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
-  echo "Installing OpenCode CLI..."
-  curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
-else
-  echo "OpenCode CLI is already installed."
-fi
-
-# Ensure opencode is symlinked to ~/.local/bin and in PATH
-if [ -f "$HOME/.opencode/bin/opencode" ]; then
-  mkdir -p "$HOME/.local/bin"
-  ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
-fi
-
-if ! grep -q 'OpenCode CLI & Aliases' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# OpenCode CLI & Aliases
-# =========================
-export PATH="$HOME/.opencode/bin:$PATH"
-alias oc='opencode'
-alias oca='opencode --auto'
-EOF
-fi
-
-echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
-eval "$($HOME/.local/bin/mise activate bash)" || true
-if ! command -v 9router &>/dev/null; then
-  $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
-else
-  echo "9router is already installed."
-fi
-
-# Configure 9router system-level systemd service to auto-start on WSL boot
-sudo tee /etc/systemd/system/9router.service >/dev/null <<EOF
-[Unit]
-Description=9router AI Gateway
-After=network.target
-
-[Service]
-Type=simple
-User=$USER
-Group=$USER
-WorkingDirectory=$HOME
-Environment=HOME=$HOME
-Environment=PATH=$HOME/.local/share/mise/shims:$HOME/.local/bin:$HOME/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=$HOME/.local/bin/mise exec -- 9router --tray --no-browser --skip-update
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Clean up obsolete user-level service if present
-systemctl --user stop 9router.service 2>/dev/null || true
-systemctl --user disable 9router.service 2>/dev/null || true
-rm -f ~/.config/systemd/user/9router.service
-
-sudo systemctl daemon-reload
-sudo systemctl enable 9router.service
-sudo systemctl restart 9router.service
-
-echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
-if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
-  cat <<'EOF' >>~/.inputrc
-
-# ==========================================================
-# Case-Insensitive Tab Completion
-# ==========================================================
-$include /etc/inputrc
-set completion-ignore-case on
-set completion-map-case on
-EOF
-fi
-
-echo "=== 16. Configure Neovim / LazyVim Optimizations ==="
-OPTIONS_FILE=~/.config/nvim/lua/config/options.lua
-if [ -f "$OPTIONS_FILE" ] && ! grep -q 'snacks_animate' "$OPTIONS_FILE"; then
-  echo '' >>"$OPTIONS_FILE"
-  echo '-- Disable animations' >>"$OPTIONS_FILE"
-  echo 'vim.g.snacks_animate = false' >>"$OPTIONS_FILE"
-fi
-
-SNACKS_PLUGIN=~/.config/nvim/lua/plugins/snacks.lua
-if [ ! -f "$SNACKS_PLUGIN" ]; then
-  mkdir -p ~/.config/nvim/lua/plugins
-  cat <<'EOF' >"$SNACKS_PLUGIN"
-return {
-  {
-    "folke/snacks.nvim",
-    opts = {
-      picker = {
-        sources = {
-          explorer = {
-            layout = {
-              auto_hide = { "input" },
-            },
-          },
-        },
-      },
-    },
-  },
-}
-EOF
-COLOR_PLUGIN=~/.config/nvim/lua/plugins/colorscheme.lua
-mkdir -p ~/.config/nvim/lua/plugins
-cat <<'EOF' >"$COLOR_PLUGIN"
-return {
-  {
-    "shaunsingh/nord.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.g.nord_contrast = true
-      vim.g.nord_borders = false
-      vim.g.nord_disable_background = false
-      vim.g.nord_italic = false
-      require("nord").set()
-    end,
-  },
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "nord",
-    },
-  },
-}
-EOF
-
-echo "=== 17. Install fzf (Fuzzy Finder) ==="
-# Download official binary release if fzf is missing or outdated (< 0.48 without --bash flag)
-if ! command -v fzf &>/dev/null || ! fzf --bash &>/dev/null; then
-  echo "Downloading latest fzf binary from GitHub..."
-  FZF_VERSION=$(curl -s "https://api.github.com/repos/junegunn/fzf/releases/latest" | grep -Po '"tag_name": "\K[^"]*' || echo "v0.60.3")
-  FZF_CLEAN_VER="${FZF_VERSION#v}"
-  curl -Lo /tmp/fzf.tar.gz "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_CLEAN_VER}-linux_amd64.tar.gz"
-  tar -xf /tmp/fzf.tar.gz -C /tmp/
-  chmod +x /tmp/fzf
-  sudo mv /tmp/fzf /usr/local/bin/fzf
-  rm -f /tmp/fzf.tar.gz
-  echo "fzf ($FZF_VERSION) installed successfully."
-else
-  echo "fzf is already up to date ($(fzf --version 2>/dev/null || echo 'fzf'))."
-fi
-
-if ! grep -q 'fzf Fuzzy Finder' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# fzf Fuzzy Finder (Ctrl+R history, Ctrl+T files, Alt+C dirs)
-# =========================
-if fzf --bash &>/dev/null; then
-  eval "$(fzf --bash)"
-elif [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
-  source /usr/share/doc/fzf/examples/key-bindings.bash
-  source /usr/share/doc/fzf/examples/completion.bash 2>/dev/null || true
-elif [ -f /usr/share/fzf/key-bindings.bash ]; then
-  source /usr/share/fzf/key-bindings.bash
-  source /usr/share/fzf/completion.bash 2>/dev/null || true
-fi
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#3b4252,bg:#2e3440,spinner:#88c0d0,hl:#81a1c1 --color=fg:#d8dee9,header:#81a1c1,info:#ebcb8b,pointer:#88c0d0 --color=marker:#a3be8c,fg+:#eceff4,prompt:#81a1c1,hl+:#88c0d0'
-EOF
-fi
-
-echo "=== 18. Install zoxide (Smart cd) ==="
-sudo apt install -y zoxide
-
-echo "=== 19. Install eza (Modern ls) ==="
-if ! command -v eza &>/dev/null; then
-  sudo mkdir -p /etc/apt/keyrings
-  wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg || true
-  echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
-  sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
-  sudo apt update && sudo apt install -y eza || echo "eza installed via apt."
-fi
-if ! grep -q 'eza aliases' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# eza (Modern ls with icons and git status)
-# =========================
-# eza aliases
-alias ls='eza --icons --group-directories-first'
-alias ll='eza -lh --icons --git --group-directories-first'
-alias la='eza -lah --icons --git --group-directories-first'
-alias lt='eza --tree --icons --level=2 --group-directories-first'
-EOF
-fi
-
-echo "=== 20. Install bat (Syntax-Highlighted cat) ==="
-sudo apt install -y bat
-if ! grep -q "alias bat=" ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# bat (Syntax-Highlighted cat — Nord theme)
-# =========================
-export BAT_THEME="Nord"
-alias cat='batcat --paging=never'
-alias bat='batcat'
-EOF
-fi
-
-echo "=== 21. Install lazygit (TUI Git Client) ==="
-if ! command -v lazygit &>/dev/null; then
-  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*' || echo "0.44.1")
-  curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-  tar -xf /tmp/lazygit.tar.gz -C /tmp/ lazygit
-  sudo install /tmp/lazygit -D -t /usr/local/bin/
-  rm -f /tmp/lazygit.tar.gz /tmp/lazygit
-  echo "lazygit installed successfully."
-else
-  echo "lazygit is already installed."
-fi
-
-echo "=== 22. Install lazydocker (TUI Docker Manager) ==="
-if ! command -v lazydocker &>/dev/null; then
-  eval "$($HOME/.local/bin/mise activate bash)" || true
-  go install github.com/jesseduffield/lazydocker@latest || echo "lazydocker installation finished."
-  if ! grep -q 'go/bin' ~/.bashrc; then
-    echo 'export PATH="$HOME/go/bin:$PATH"' >>~/.bashrc
-  fi
-else
-  echo "lazydocker is already installed."
-fi
-
-echo "=== 23. Install GitHub CLI (gh) ==="
-if ! command -v gh &>/dev/null; then
-  (type -p wget >/dev/null || sudo apt install wget -y) \
-  && sudo mkdir -p -m 755 /etc/apt/keyrings \
-  && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null \
-  && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null \
-  && sudo apt update \
-  && sudo apt install -y gh
-else
-  echo "GitHub CLI (gh) is already installed."
-fi
-
-echo "=== 24. Install git-delta (Syntax-Highlighted Git Diffs) ==="
-sudo apt install -y git-delta || echo "git-delta package check complete."
-git config --global core.pager delta
-git config --global interactive.diffFilter "delta --color-only"
-git config --global delta.line-numbers true
-git config --global delta.dark true
-git config --global delta.syntax-theme "Nord"
-
-echo "=== 25. Configure Better Bash History ==="
-if ! grep -q 'Better Bash History' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# Better Bash History
-# =========================
-export HISTSIZE=100000
-export HISTFILESIZE=200000
-export HISTCONTROL=ignoreboth:erasedups
-export HISTTIMEFORMAT="%F %T  "
-shopt -s histappend
-shopt -s cmdhist
-PROMPT_COMMAND="history -a; ${PROMPT_COMMAND}"
-EOF
-fi
-
-echo "=== 26. Configure SSH Agent Auto-Start ==="
-if ! grep -q 'SSH Agent Auto-Start' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# SSH Agent Auto-Start
-# =========================
-if [ -z "$SSH_AUTH_SOCK" ]; then
-  eval "$(ssh-agent -s)" >/dev/null 2>&1
-fi
-EOF
-fi
-
-echo "=== 27. Install Starship Prompt (LAST — wraps prompt) ==="
-if ! command -v starship &>/dev/null; then
-  curl -sS https://starship.rs/install.sh | sh -s -- --yes
-else
-  echo "Starship is already installed."
-fi
-mkdir -p ~/.config
-cat <<'EOF' >~/.config/starship.toml
-"$schema" = 'https://starship.rs/config-schema.json'
-
-add_newline = true
-
-# Clean, modern & minimal prompt layout
-format = """
-$directory\
-$git_branch\
-$git_status\
-$nodejs\
-$golang\
-$ruby\
-$rust\
-$docker_context\
-$package\
-$cmd_duration\
-$line_break\
-$character"""
-
-[character]
-success_symbol = "[❯](bold #81a1c1)"
-error_symbol = "[❯](bold #bf616a)"
-vimcmd_symbol = "[❮](bold #a3be8c)"
-
-[directory]
-style = "bold #88c0d0"
-truncation_length = 3
-truncation_symbol = "…/"
-read_only = " 󰌾"
-read_only_style = "red"
-
-[git_branch]
-symbol = " "
-style = "bold #b48ead"
-format = "on [$symbol$branch]($style) "
-
-[git_status]
-style = "bold #bf616a"
-format = "([$all_status$ahead_behind]($style) )"
-
-[nodejs]
-symbol = " "
-style = "bold #a3be8c"
-format = "via [$symbol($version )]($style)"
-
-[golang]
-symbol = " "
-style = "bold #88c0d0"
-format = "via [$symbol($version )]($style)"
-
-[ruby]
-symbol = " "
-style = "bold #bf616a"
-format = "via [$symbol($version )]($style)"
-
-[rust]
-symbol = " "
-style = "bold #d08770"
-format = "via [$symbol($version )]($style)"
-
-[docker_context]
-symbol = " "
-style = "bold #81a1c1"
-format = "via [$symbol$context]($style) "
-
-[cmd_duration]
-min_time = 2_000
-style = "bold #ebcb8b"
-format = "took [$duration]($style) "
-EOF
-
-# Starship wraps prompt components
-if ! grep -q 'starship init bash' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# Starship Prompt
-# =========================
-eval "$(starship init bash)"
-EOF
-fi
-
-echo "=== 28. Configure zoxide (Must be initialized AFTER Starship at the end of .bashrc) ==="
-# Remove any previous zoxide block that may have been placed before Starship
-sed -i '/zoxide (Smart Directory Jumper)/{N;N;N;N;d}' ~/.bashrc 2>/dev/null || true
-sed -i '/eval "\$(zoxide init bash)"/d' ~/.bashrc 2>/dev/null || true
-sed -i "/alias cd='z'/d" ~/.bashrc 2>/dev/null || true
-
-if ! grep -q 'zoxide init bash' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
-
-# =========================
-# zoxide (Smart Directory Jumper — Initialized after Starship to avoid doctor warning)
-# =========================
-eval "$(zoxide init bash)"
-alias cd='z'
-EOF
-fi
-
-echo "=========================================="
-echo " 🎉 Setup Complete!"
-echo " IMPORTANT: Please CLOSE this terminal and REOPEN it (via Alacritty) to start your new environment."
-echo "=========================================="
+code .
 ```
+This launches VS Code on Windows instantly connected to your WSL directory with full language server support and native Linux I/O speeds.
+
+### 2. VS Code Integrated Terminal
+Press `Ctrl + ~` (or `Ctrl + ` `) inside VS Code to open the integrated terminal.
+- Prompt: Styled with **Starship** and **Nord** colors.
+- Icons: Rendered with **JetBrainsMono Nerd Font**.
+
+### 3. Modern CLI Replacements
+| Classic Command | Enhanced Command | Description |
+| :--- | :--- | :--- |
+| `ls` | `eza --icons` | Modern `ls` with filetype icons |
+| `ll` | `eza -lh --icons --git` | Detailed list with Git file status |
+| `la` | `eza -lah --icons --git` | Detailed list including hidden files |
+| `lt` | `eza --tree --level=2` | Visual folder tree structure |
+| `cat <file>` | `bat <file>` | Syntax-highlighted viewer with Nord palette |
+| `cd <path>` | `z <query>` | Smart jump to frequent directories |
+| `Ctrl + R` | **fzf** History | Interactive fuzzy search of shell command history |
+| `Ctrl + T` | **fzf** Files | Interactive fuzzy search to select files into command line |
+| `git diff` | **git-delta** | Side-by-side syntax-highlighted diffs |
+
+### 4. Git & Docker Workflow
+- **lazygit**: Run `lazygit` in any Git repository for an intuitive, keyboard-driven Git TUI.
+- **lazydocker**: Run `lazydocker` to inspect containers, logs, CPU/RAM usage, and restart services.
+- **GitHub CLI**: Run `gh auth login`, `gh pr create`, `gh repo clone`.
+
+### 5. On-Demand Databases (WSL RAM Saver)
+Databases run only when you need them, saving gigabytes of host RAM:
+```bash
+db-pg      # Starts PostgreSQL 16 + Redis 7 in background
+db-mysql   # Starts MySQL 8.4 + Redis 7 in background
+db-all     # Starts PostgreSQL + MySQL + Redis
+db-stop    # Stops all dev database containers
+db-status  # Displays running Docker containers
+```
+
+### 6. AI Development Tools
+- **Antigravity CLI**:
+  ```bash
+  agy      # Launch Antigravity interactive assistant
+  agyd     # Launch Antigravity skipping permission prompts
+  ```
+- **OpenCode CLI**:
+  ```bash
+  oc       # Launch OpenCode AI agent
+  oca      # Launch OpenCode in autonomous mode
+  ```
+- **9router**: Automatically runs in background on port `20128` as a systemd service.
+
+---
+
+## 🎨 Aesthetic & Theming
+
+Every component uses the official **Nord** color palette:
+
+| Element | Color Hex | Role |
+| :--- | :--- | :--- |
+| **Polar Night (Dark)** | `#2e3440` | Editor & Terminal Background |
+| **Polar Night (Accent)** | `#3b4252` | Status bars, line highlights, borders |
+| **Snow Storm (Light)** | `#d8dee9` / `#eceff4` | Text foreground & prompt symbols |
+| **Frost (Blue/Cyan)** | `#88c0d0` / `#81a1c1` | Directories, git branches, highlights |
+| **Aurora (Green)** | `#a3be8c` | Success symbols, Node version indicator |
+| **Aurora (Yellow/Orange)** | `#ebcb8b` / `#d08770` | Duration timer, Rust indicator |
+| **Aurora (Red)** | `#bf616a` | Error indicators, Ruby version |
+
+---
+
+## 🛠️ RAM & Performance Tuning
+
+WSL 2 memory management is handled by `%USERPROFILE%\.wslconfig`:
+```ini
+[wsl2]
+memory=8GB
+processors=4
+swap=2GB
+
+[experimental]
+autoMemoryReclaim=gradual
+sparseVhd=true
+vmIdleTimeout=-1
+```
+- **`autoMemoryReclaim=gradual`**: Automatically returns freed Linux memory back to Windows so `vmmem` doesn't consume all your host RAM.
+- **`sparseVhd=true`**: Shrinks the WSL virtual disk when files are deleted.
+- **`vmIdleTimeout=-1`**: Prevents unexpected VM shutdowns.
+
+To apply changes to `.wslconfig`, run in PowerShell:
+```powershell
+wsl --shutdown
+```
+
+---
+
+## 📄 License
+MIT License. Free to use, adapt, and share.

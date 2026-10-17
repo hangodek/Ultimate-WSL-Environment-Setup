@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
 export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
 
-echo "=== 1. Update System & Install Base Dependencies (Omakub + WSL Tools) ==="
+echo "=== 1. Update System & Install Base Dependencies (WSL Tools) ==="
 sudo apt update && sudo apt install -y \
   build-essential pkg-config autoconf bison clang rustc pipx \
   libssl-dev libreadline-dev zlib1g-dev libyaml-dev libncurses5-dev libffi-dev libgdbm-dev libjemalloc2 \
@@ -97,41 +97,26 @@ volumes:
   redis_data:
 EOF
 
-echo "=== 4. Install Latest Neovim (via PPA) ==="
-sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt update
-sudo apt install neovim -y
-
-echo "=== 5. Setup LazyVim ==="
-if [ -d ~/.config/nvim ] && [ -f ~/.config/nvim/init.lua ]; then
-  echo "LazyVim/Neovim configuration already exists in ~/.config/nvim (skipping clone)."
-else
-  if [ -d ~/.config/nvim ]; then
-    BACKUP_DIR=~/.config/nvim.bak.$(date +%Y%m%d%H%M%S)
-    mv ~/.config/nvim "$BACKUP_DIR"
-    echo "Backed up existing non-LazyVim nvim config to $BACKUP_DIR"
-  fi
-  git clone https://github.com/LazyVim/starter ~/.config/nvim
-  rm -rf ~/.config/nvim/.git
-fi
-
-echo "=== 6. Install mise (Version Manager) ==="
+echo "=== 4. Install mise (Version Manager) ==="
 curl https://mise.run | sh
 if ! grep -q 'mise activate bash' ~/.bashrc; then
   echo 'eval "$(~/.local/bin/mise activate bash)"' >>~/.bashrc
 fi
 eval "$($HOME/.local/bin/mise activate bash)" || true
 
-echo "=== 7. Install Node.js, Go, and Ruby via mise ==="
+echo "=== 5. Install Node.js, Go, and Ruby via mise ==="
 mise use --global node@lts
 mise use --global go@latest
 mise use --global ruby@latest
 
-echo "=== 8. Install Ruby on Rails ==="
+echo "=== 6. Install Ruby on Rails ==="
 eval "$($HOME/.local/bin/mise env 2>/dev/null)" || true
 gem install rails || echo "Rails installation finished."
 
-echo "=== 9. Setup Custom Aliases ==="
+echo "=== 7. Setup Custom Aliases ==="
+# Remove legacy alias if present
+sed -i '/alias n="nvim"/d' ~/.bashrc 2>/dev/null || true
+
 if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
@@ -141,8 +126,7 @@ if ! grep -q 'Dev Custom Aliases' ~/.bashrc; then
 # System & Package Management
 alias upd="sudo apt update && sudo apt upgrade"
 
-# Editor & Frameworks
-alias n="nvim"
+# Frameworks & Dev
 alias r="rails"
 
 # Database On-Demand (WSL RAM Saver)
@@ -154,7 +138,7 @@ alias db-status="docker ps"
 EOF
 fi
 
-echo "=== 10. Install Zellij (Terminal Multiplexer) ==="
+echo "=== 8. Install Zellij (Optional Terminal Multiplexer) ==="
 if ! command -v zellij &>/dev/null; then
   echo "Fetching latest Zellij release for Linux..."
   ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
@@ -172,7 +156,7 @@ else
   echo "Zellij is already installed ($(zellij --version))."
 fi
 
-# Configure Zellij
+# Configure Zellij theme (available on-demand via 'zellij', without auto-starting)
 mkdir -p ~/.config/zellij
 cat <<'EOF' >~/.config/zellij/config.kdl
 // ==========================================================
@@ -209,21 +193,10 @@ themes {
 }
 EOF
 
-echo "=== 11. Configure Zellij Auto-Start in .bashrc ==="
-if ! grep -q 'Zellij Auto-Start' ~/.bashrc; then
-  cat <<'EOF' >>~/.bashrc
+# Ensure any legacy Zellij auto-start is removed from .bashrc for clean VS Code integrated terminal
+sed -i '/# Zellij Auto-Start/,/fi/d' ~/.bashrc 2>/dev/null || true
 
-# =========================
-# Zellij Auto-Start
-# =========================
-# Automatically start Zellij in interactive sessions (outside nested Zellij/TMUX/VSCode)
-if command -v zellij &>/dev/null && [ -z "$ZELLIJ" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -t 1 ]; then
-    exec zellij
-fi
-EOF
-fi
-
-echo "=== 12. Install Antigravity CLI (agy) & Alias ==="
+echo "=== 9. Install Antigravity CLI (agy) & Alias ==="
 if ! command -v agy &>/dev/null; then
   curl -fsSL https://antigravity.google/cli/install.sh | bash || echo "Antigravity installer finished."
 else
@@ -240,7 +213,7 @@ alias agyd='agy --dangerously-skip-permissions'
 EOF
 fi
 
-echo "=== 13. Install OpenCode CLI & Aliases ==="
+echo "=== 10. Install OpenCode CLI & Aliases ==="
 if ! command -v opencode &>/dev/null && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
   echo "Installing OpenCode CLI..."
   curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
@@ -365,7 +338,7 @@ except Exception: pass
   fi
 fi
 
-echo "=== 14. Install 9router AI Gateway & Auto-Start Service ==="
+echo "=== 11. Install 9router AI Gateway & Auto-Start Service ==="
 eval "$($HOME/.local/bin/mise activate bash)" || true
 if ! command -v 9router &>/dev/null; then
   $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
@@ -403,7 +376,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable 9router.service
 sudo systemctl restart 9router.service
 
-echo "=== 15. Configure Case-Insensitive Bash Tab Completion ==="
+echo "=== 12. Configure Case-Insensitive Bash Tab Completion ==="
 if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then
   cat <<'EOF' >>~/.inputrc
 
@@ -416,63 +389,7 @@ set completion-map-case on
 EOF
 fi
 
-echo "=== 16. Configure Neovim / LazyVim Optimizations & Nord Theme ==="
-OPTIONS_FILE=~/.config/nvim/lua/config/options.lua
-if [ -f "$OPTIONS_FILE" ] && ! grep -q 'snacks_animate' "$OPTIONS_FILE"; then
-  echo '' >>"$OPTIONS_FILE"
-  echo '-- Disable animations' >>"$OPTIONS_FILE"
-  echo 'vim.g.snacks_animate = false' >>"$OPTIONS_FILE"
-fi
-
-SNACKS_PLUGIN=~/.config/nvim/lua/plugins/snacks.lua
-if [ ! -f "$SNACKS_PLUGIN" ]; then
-  mkdir -p ~/.config/nvim/lua/plugins
-  cat <<'EOF' >"$SNACKS_PLUGIN"
-return {
-  {
-    "folke/snacks.nvim",
-    opts = {
-      picker = {
-        sources = {
-          explorer = {
-            layout = {
-              auto_hide = { "input" },
-            },
-          },
-        },
-      },
-    },
-  },
-}
-EOF
-fi
-
-COLOR_PLUGIN=~/.config/nvim/lua/plugins/colorscheme.lua
-mkdir -p ~/.config/nvim/lua/plugins
-cat <<'EOF' >"$COLOR_PLUGIN"
-return {
-  {
-    "shaunsingh/nord.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.g.nord_contrast = true
-      vim.g.nord_borders = false
-      vim.g.nord_disable_background = false
-      vim.g.nord_italic = false
-      require("nord").set()
-    end,
-  },
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "nord",
-    },
-  },
-}
-EOF
-
-echo "=== 17. Install fzf (Fuzzy Finder) ==="
+echo "=== 13. Install fzf (Fuzzy Finder) ==="
 # Download official binary release if fzf is missing or outdated (< 0.48 without --bash flag)
 if ! command -v fzf &>/dev/null || ! fzf --bash &>/dev/null; then
   echo "Downloading latest fzf binary from GitHub..."
@@ -509,10 +426,10 @@ export FZF_DEFAULT_OPTS='--height 40% --border --color=bg+:#3b4252,bg:#2e3440,sp
 EOF
 fi
 
-echo "=== 18. Install zoxide (Smart cd) ==="
+echo "=== 14. Install zoxide (Smart cd) ==="
 sudo apt install -y zoxide
 
-echo "=== 19. Install eza (Modern ls) ==="
+echo "=== 15. Install eza (Modern ls) ==="
 if ! command -v eza &>/dev/null; then
   sudo mkdir -p /etc/apt/keyrings
   wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg || true
@@ -534,7 +451,7 @@ alias lt='eza --tree --icons --level=2 --group-directories-first'
 EOF
 fi
 
-echo "=== 20. Install bat (Syntax-Highlighted cat) ==="
+echo "=== 16. Install bat (Syntax-Highlighted cat) ==="
 sudo apt install -y bat
 if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
   sudo ln -sf "$(which batcat)" /usr/local/bin/bat
@@ -551,7 +468,7 @@ alias bat='batcat'
 EOF
 fi
 
-echo "=== 21. Install lazygit (TUI Git Client) ==="
+echo "=== 17. Install lazygit (TUI Git Client) ==="
 if ! command -v lazygit &>/dev/null; then
   LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*' || echo "0.44.1")
   curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
@@ -563,7 +480,7 @@ else
   echo "lazygit is already installed."
 fi
 
-echo "=== 22. Install lazydocker (TUI Docker Manager) ==="
+echo "=== 18. Install lazydocker (TUI Docker Manager) ==="
 if ! command -v lazydocker &>/dev/null; then
   eval "$($HOME/.local/bin/mise activate bash)" || true
   go install github.com/jesseduffield/lazydocker@latest || echo "lazydocker installation finished."
@@ -574,7 +491,7 @@ else
   echo "lazydocker is already installed."
 fi
 
-echo "=== 23. Install GitHub CLI (gh) ==="
+echo "=== 19. Install GitHub CLI (gh) ==="
 if ! command -v gh &>/dev/null; then
   (type -p wget >/dev/null || sudo apt install wget -y) \
   && sudo mkdir -p -m 755 /etc/apt/keyrings \
@@ -587,7 +504,7 @@ else
   echo "GitHub CLI (gh) is already installed."
 fi
 
-echo "=== 24. Install git-delta (Syntax-Highlighted Git Diffs) ==="
+echo "=== 20. Install git-delta (Syntax-Highlighted Git Diffs) ==="
 sudo apt install -y git-delta || echo "git-delta package check complete."
 git config --global core.pager delta
 git config --global interactive.diffFilter "delta --color-only"
@@ -595,7 +512,7 @@ git config --global delta.line-numbers true
 git config --global delta.dark true
 git config --global delta.syntax-theme "Nord"
 
-echo "=== 25. Configure Better Bash History ==="
+echo "=== 21. Configure Better Bash History ==="
 if ! grep -q 'Better Bash History' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
@@ -612,7 +529,7 @@ PROMPT_COMMAND="history -a; ${PROMPT_COMMAND}"
 EOF
 fi
 
-echo "=== 26. Configure SSH Agent Auto-Start ==="
+echo "=== 22. Configure SSH Agent Auto-Start ==="
 if ! grep -q 'SSH Agent Auto-Start' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
@@ -625,7 +542,7 @@ fi
 EOF
 fi
 
-echo "=== 27. Install Starship Prompt (LAST — wraps prompt) ==="
+echo "=== 23. Install Starship Prompt (LAST — wraps prompt) ==="
 if ! command -v starship &>/dev/null; then
   curl -sS https://starship.rs/install.sh | sh -s -- --yes
 else
@@ -715,7 +632,7 @@ eval "$(starship init bash)"
 EOF
 fi
 
-echo "=== 28. Configure zoxide (Must be initialized AFTER Starship at the end of .bashrc) ==="
+echo "=== 24. Configure zoxide (Must be initialized AFTER Starship at the end of .bashrc) ==="
 # Remove any previous zoxide block that may have been placed before Starship
 sed -i '/zoxide (Smart Directory Jumper)/{N;N;N;N;d}' ~/.bashrc 2>/dev/null || true
 sed -i '/eval "\$(zoxide init bash)"/d' ~/.bashrc 2>/dev/null || true
@@ -732,7 +649,7 @@ alias cd='z'
 EOF
 fi
 
-echo "=== 29. Configure WSLg Wayland Runtime Path (Fixes Clipboard & Image Paste) ==="
+echo "=== 25. Configure WSLg Wayland Runtime Path (Fixes Clipboard & Image Paste) ==="
 if ! grep -q 'WSLg Wayland Runtime Fix' ~/.bashrc; then
   cat <<'EOF' >>~/.bashrc
 
@@ -759,5 +676,6 @@ fi
 
 echo "=========================================="
 echo " 🎉 Setup Complete!"
-echo " IMPORTANT: Please CLOSE this terminal and REOPEN it (via Alacritty) to start your new environment."
+echo " Open your project in VS Code anytime via:"
+echo "   code ."
 echo "=========================================="

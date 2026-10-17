@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title Installing Alacritty ^& WSL Environment...
+title Installing VS Code ^& WSL Environment...
 
 :: Launch PowerShell with execution policy bypassed for this script
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0install-terminal.ps1" %*
