@@ -429,6 +429,30 @@ fi
 echo "=== 14. Install zoxide (Smart cd) ==="
 sudo apt install -y zoxide
 
+echo "=== 14b. Install JetBrainsMono Nerd Font (Linux & Windows Host Sync) ==="
+if [ ! -f "$HOME/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf" ]; then
+  echo "Installing JetBrainsMono Nerd Font in ~/.local/share/fonts..."
+  mkdir -p "$HOME/.local/share/fonts"
+  FONT_TMP=$(mktemp -d)
+  if curl -fsSL -o "$FONT_TMP/JetBrainsMono.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz"; then
+    tar -xf "$FONT_TMP/JetBrainsMono.tar.xz" -C "$FONT_TMP"
+    cp "$FONT_TMP"/*.ttf "$HOME/.local/share/fonts/" 2>/dev/null || true
+    fc-cache -f "$HOME/.local/share/fonts" 2>/dev/null || true
+    echo "✓ JetBrainsMono Nerd Font installed in ~/.local/share/fonts."
+  fi
+  rm -rf "$FONT_TMP"
+fi
+
+# Auto-sync fonts to Windows host user font directory if running in WSL
+if [ -d "/mnt/c/Users" ]; then
+  for win_user_fonts in /mnt/c/Users/*/AppData/Local/Microsoft/Windows/Fonts; do
+    if [ -d "$win_user_fonts" ] && [ ! -f "$win_user_fonts/JetBrainsMonoNerdFont-Regular.ttf" ]; then
+      echo "Syncing JetBrainsMono Nerd Font to Windows user fonts ($win_user_fonts)..."
+      cp -u "$HOME/.local/share/fonts"/JetBrainsMonoNerdFont*.ttf "$win_user_fonts/" 2>/dev/null || true
+    fi
+  done
+fi
+
 echo "=== 15. Install eza (Modern ls) ==="
 if ! command -v eza &>/dev/null; then
   sudo mkdir -p /etc/apt/keyrings

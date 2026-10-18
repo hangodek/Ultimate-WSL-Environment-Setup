@@ -79,11 +79,12 @@ powershell -ExecutionPolicy Bypass -File .\install-terminal.ps1
 ```
 
 > **What this does on Windows:**
-> 1. Installs **Visual Studio Code** and **JetBrainsMono Nerd Font** via WinGet (idempotent, skips if already installed).
+> 1. Installs **Visual Studio Code** and **JetBrainsMono Nerd Font** (WinGet + automatic zero-admin direct GitHub fallback).
 > 2. Automatically installs essential VS Code extensions (`Remote - WSL`, `Nord Theme`, `GitLens`, `Docker`, `Prettier`, `ErrorLens`).
 > 3. Configures `%APPDATA%\Code\User\settings.json` with Nord colors, font ligatures, format on save, and terminal styling.
-> 4. Generates `%USERPROFILE%\.wslconfig` with memory caps (8GB limit, `autoMemoryReclaim = gradual`, `vmIdleTimeout = -1`).
-> 5. Configures **Alacritty** as an optional standalone GPU terminal companion.
+> 4. Configures **Windows Terminal** default profile with `JetBrainsMono Nerd Font` and the **Nord** color scheme.
+> 5. Generates `%USERPROFILE%\.wslconfig` with memory caps (8GB limit, `autoMemoryReclaim = gradual`, `vmIdleTimeout = -1`).
+> 6. Configures **Alacritty** as an optional standalone GPU terminal companion.
 
 ---
 
@@ -107,9 +108,10 @@ chmod +x setup.sh
 > 2. Configures Docker CE official repository & Docker compose.
 > 3. Sets up on-demand Docker Compose databases (PostgreSQL 16, MySQL 8.4, Redis 7).
 > 4. Installs `mise` and provisions Node.js (LTS), Go (latest), and Ruby with Rails.
-> 5. Installs modern CLI tools: `starship`, `zoxide`, `fzf`, `eza`, `bat`, `lazygit`, `lazydocker`, `gh`, and `git-delta`.
-> 6. Installs and configures AI tools: `agy` (Antigravity CLI), `opencode`, Concat MCP bridge, and `9router` systemd service.
-> 7. Configures case-insensitive bash tab completion, high-capacity bash history, and SSH agent auto-start.
+> 5. Installs **JetBrainsMono Nerd Font** in `~/.local/share/fonts` and auto-syncs with Windows user fonts.
+> 6. Installs modern CLI tools: `starship`, `zoxide`, `fzf`, `eza`, `bat`, `lazygit`, `lazydocker`, `gh`, and `git-delta`.
+> 7. Installs and configures AI tools: `agy` (Antigravity CLI), `opencode`, Concat MCP bridge, and `9router` systemd service.
+> 8. Configures case-insensitive bash tab completion, high-capacity bash history, and SSH agent auto-start.
 
 ---
 

@@ -1,10 +1,12 @@
 <#
 .SYNOPSIS
-    Automated Windows Environment Setup for WSL (VS Code + Remote-WSL + JetBrainsMono Nerd Font + Nord Theme + .wslconfig)
+    Automated Windows Environment Setup for WSL (VS Code + Windows Terminal + JetBrainsMono Nerd Font + Nord Theme + .wslconfig)
 .DESCRIPTION
-    Installs and configures Visual Studio Code, JetBrainsMono Nerd Font, and (optionally) Alacritty terminal emulator via WinGet.
+    Installs and configures Visual Studio Code, Windows Terminal, JetBrainsMono Nerd Font, and (optionally) Alacritty terminal emulator.
     Automatically configures:
+    - JetBrainsMono Nerd Font with automatic per-user direct fallback (guarantees icon glyphs in all terminals).
     - Visual Studio Code with Nord theme, JetBrainsMono Nerd Font, and essential developer extensions (Remote-WSL, GitLens, Docker, Prettier, ErrorLens).
+    - Windows Terminal default profiles styled with JetBrainsMono Nerd Font and Nord color palette.
     - VS Code integrated terminal with Nord arctic color palette and Nerd Font glyphs.
     - WSL 2 performance & memory cap via .wslconfig (memory limit, gradual reclaim, vmIdleTimeout).
     - Alacritty GPU-accelerated terminal pre-configured with Nord theme and direct WSL launch.
@@ -74,19 +76,103 @@ function Install-WingetApp {
     }
 }
 
-# 2. Install JetBrainsMono Nerd Font
+function Install-JetBrainsNerdFont {
+    Write-Host "  Checking for installed JetBrainsMono Nerd Font..." -NoNewline
+    $userFontsDir = Join-Path $env:LOCALAPPDATA "Microsoft\Windows\Fonts"
+    $winFontsDir = Join-Path $env:windir "Fonts"
+
+    $existing = (Get-ChildItem -Path $userFontsDir, $winFontsDir -Filter "*JetBrains*Nerd*.ttf" -ErrorAction SilentlyContinue)
+    if ($existing -and $existing.Count -gt 0) {
+        Write-Host " [Already Installed ($($existing.Count) font files found)]" -ForegroundColor Green
+        return
+    }
+    Write-Host " [Not Found]" -ForegroundColor Yellow
+
+    # Try Winget first if available
+    $wingetSuccess = $false
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Host "  Trying WinGet package install..." -ForegroundColor DarkGray
+        $installArgs = @("install", "--id", "DEVCOM.JetBrainsMonoNerdFont", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements")
+        $proc = Start-Process -FilePath "winget" -ArgumentList $installArgs -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+        if ($proc -and $proc.ExitCode -eq 0) {
+            $wingetSuccess = $true
+        }
+    }
+
+    # Verify if WinGet actually placed font files
+    $existingAfter = (Get-ChildItem -Path $userFontsDir, $winFontsDir -Filter "*JetBrains*Nerd*.ttf" -ErrorAction SilentlyContinue)
+    if ($wingetSuccess -and $existingAfter -and $existingAfter.Count -gt 0) {
+        Write-Host "  ✓ JetBrainsMono Nerd Font successfully installed via WinGet." -ForegroundColor Green
+        return
+    }
+
+    # Direct download fallback: zero-admin per-user installation
+    Write-Host "  Directly downloading JetBrainsMono Nerd Font from GitHub..." -ForegroundColor Yellow
+    if (-not (Test-Path $userFontsDir)) {
+        New-Item -ItemType Directory -Path $userFontsDir -Force | Out-Null
+    }
+
+    $zipUrl = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
+    $tempZip = Join-Path $env:TEMP "JetBrainsMonoNerdFont.zip"
+    $extractDir = Join-Path $env:TEMP "JetBrainsMonoNerdFont_Extracted"
+
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+        Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing
+        
+        if (Test-Path $extractDir) {
+            Remove-Item -Path $extractDir -Recurse -Force | Out-Null
+        }
+        Expand-Archive -Path $tempZip -DestinationPath $extractDir -Force
+
+        $fontFiles = Get-ChildItem -Path $extractDir -Filter "*.ttf"
+        $regKey = "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"
+
+        foreach ($font in $fontFiles) {
+            $destPath = Join-Path $userFontsDir $font.Name
+            Copy-Item -Path $font.FullName -Destination $destPath -Force
+
+            $fontName = $font.BaseName.Replace("-", " ") + " (TrueType)"
+            New-ItemProperty -Path $regKey -Name $fontName -Value $destPath -PropertyType String -Force | Out-Null
+        }
+
+        # Broadcast WM_FONTCHANGE so open applications update their font list immediately
+        Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class FontNotify {
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);
+}
+"@ -ErrorAction SilentlyContinue
+
+        try {
+            $result = [IntPtr]::Zero
+            [FontNotify]::SendMessageTimeout([IntPtr]0xffff, 0x001D, [IntPtr]::Zero, $null, 2, 1000, [ref]$result) | Out-Null
+        } catch {}
+
+        Write-Host "  ✓ Installed and registered $($fontFiles.Count) JetBrainsMono Nerd Font files (per-user, no admin required)." -ForegroundColor Green
+    } catch {
+        Write-Host "  ⚠️ Direct font download encountered an issue: $($_.Exception.Message)" -ForegroundColor DarkYellow
+    } finally {
+        if (Test-Path $tempZip) { Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $extractDir) { Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue }
+    }
+}
+
+# 2. Install JetBrainsMono Nerd Font (with automatic GitHub download fallback)
 Write-Host ""
-Write-Host "[2/6] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
-Install-WingetApp -PackageId "DEVCOM.JetBrainsMonoNerdFont" -DisplayName "JetBrainsMono Nerd Font" -FallbackId "JetBrains.JetBrainsMono.NerdFont"
+Write-Host "[2/7] Installing JetBrainsMono Nerd Font..." -ForegroundColor Yellow
+Install-JetBrainsNerdFont
 
 # 3. Install Visual Studio Code
 Write-Host ""
-Write-Host "[3/6] Installing Visual Studio Code..." -ForegroundColor Yellow
+Write-Host "[3/7] Installing Visual Studio Code..." -ForegroundColor Yellow
 Install-WingetApp -PackageId "Microsoft.VisualStudioCode" -DisplayName "Visual Studio Code"
 
 # 4. Install & Configure VS Code Extensions and Settings
 Write-Host ""
-Write-Host "[4/6] Configuring Visual Studio Code (Extensions & Nord Theme)..." -ForegroundColor Yellow
+Write-Host "[4/7] Configuring Visual Studio Code (Extensions & Nord Theme)..." -ForegroundColor Yellow
 
 # Locate 'code' CLI executable
 $codeCmd = $null
@@ -184,9 +270,94 @@ $settingsJson = $settingsObj | ConvertTo-Json -Depth 10
 Set-Content -Path $vscodeSettingsFile -Value $settingsJson -Encoding UTF8
 Write-Host "  ✓ Configured VS Code settings in $vscodeSettingsFile" -ForegroundColor Green
 
-# 5. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+# 5. Configure Windows Terminal (JetBrainsMono Nerd Font & Nord Theme)
 Write-Host ""
-Write-Host "[5/6] Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
+Write-Host "[5/7] Configuring Windows Terminal (JetBrainsMono Nerd Font & Nord Theme)..." -ForegroundColor Yellow
+
+$wtSettingsCandidates = @(
+    (Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"),
+    (Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json"),
+    (Join-Path $env:LOCALAPPDATA "Microsoft\Windows Terminal\settings.json")
+)
+
+$configuredWt = $false
+foreach ($wtSettingsFile in $wtSettingsCandidates) {
+    if (Test-Path -Path $wtSettingsFile) {
+        try {
+            $rawJson = Get-Content -Path $wtSettingsFile -Raw -Encoding UTF8
+            $wtSettings = $rawJson | ConvertFrom-Json
+
+            if (-not $wtSettings.profiles) {
+                $wtSettings | Add-Member -MemberType NoteProperty -Name "profiles" -Value ([PSCustomObject]@{})
+            }
+            if (-not $wtSettings.profiles.defaults) {
+                $wtSettings.profiles | Add-Member -MemberType NoteProperty -Name "defaults" -Value ([PSCustomObject]@{})
+            }
+
+            $defaults = $wtSettings.profiles.defaults
+            if (-not $defaults.font) {
+                $defaults | Add-Member -MemberType NoteProperty -Name "font" -Value ([PSCustomObject]@{})
+            }
+            $defaults.font | Add-Member -MemberType NoteProperty -Name "face" -Value "JetBrainsMono Nerd Font" -Force
+            $defaults | Add-Member -MemberType NoteProperty -Name "colorScheme" -Value "Nord" -Force
+
+            # Ensure Nord color scheme is defined in schemes array
+            if (-not $wtSettings.schemes) {
+                $wtSettings | Add-Member -MemberType NoteProperty -Name "schemes" -Value @()
+            }
+
+            $nordFound = $false
+            foreach ($s in $wtSettings.schemes) {
+                if ($s.name -eq "Nord") {
+                    $nordFound = $true
+                    break
+                }
+            }
+
+            if (-not $nordFound) {
+                $nordScheme = [PSCustomObject]@{
+                    name                = "Nord"
+                    background          = "#2E3440"
+                    foreground          = "#D8DEE9"
+                    selectionBackground = "#434C5E"
+                    cursorColor         = "#D8DEE9"
+                    black               = "#3B4252"
+                    red                 = "#BF616A"
+                    green               = "#A3BE8C"
+                    yellow              = "#EBCB8B"
+                    blue                = "#81A1C1"
+                    purple              = "#B48EAD"
+                    cyan                = "#88C0D0"
+                    white               = "#E5E9F0"
+                    brightBlack         = "#4C566A"
+                    brightRed           = "#BF616A"
+                    brightGreen         = "#A3BE8C"
+                    brightYellow        = "#EBCB8B"
+                    brightBlue          = "#81A1C1"
+                    brightPurple        = "#B48EAD"
+                    brightCyan          = "#8FBCBB"
+                    brightWhite         = "#ECEFF4"
+                }
+                $wtSettings.schemes = @($wtSettings.schemes) + $nordScheme
+            }
+
+            $updatedJson = $wtSettings | ConvertTo-Json -Depth 20
+            Set-Content -Path $wtSettingsFile -Value $updatedJson -Encoding UTF8
+            Write-Host "  ✓ Configured Windows Terminal settings at $wtSettingsFile" -ForegroundColor Green
+            $configuredWt = $true
+        } catch {
+            Write-Host "  ⚠️ Could not update Windows Terminal settings at $wtSettingsFile: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        }
+    }
+}
+
+if (-not $configuredWt) {
+    Write-Host "  Windows Terminal settings not detected (will apply default profile settings when launched)." -ForegroundColor DarkGray
+}
+
+# 6. Configure .wslconfig (RAM limit & auto-reclaim for WSL2)
+Write-Host ""
+Write-Host "[6/7] Configuring .wslconfig (WSL 2 Performance & RAM Tuning)..." -ForegroundColor Yellow
 $wslConfigFile = Join-Path -Path $env:USERPROFILE -ChildPath ".wslconfig"
 if (-not (Test-Path -Path $wslConfigFile)) {
     $wslConfigContent = @'
@@ -235,10 +406,10 @@ try {
     }
 } catch {}
 
-# 6. Optional: Alacritty GPU Terminal Setup
+# 7. Optional: Alacritty GPU Terminal Setup
 Write-Host ""
 if (-not $SkipAlacritty) {
-    Write-Host "[6/6] Setting up Alacritty (Fast Standalone Terminal Companion)..." -ForegroundColor Yellow
+    Write-Host "[7/7] Setting up Alacritty (Fast Standalone Terminal Companion)..." -ForegroundColor Yellow
     Install-WingetApp -PackageId "Alacritty.Alacritty" -DisplayName "Alacritty"
 
     $alacrittyConfigDir = Join-Path -Path $env:APPDATA -ChildPath "alacritty"
