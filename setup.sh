@@ -332,9 +332,11 @@ fi
 OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
 if [ ! -f "$OPENCODE_CONFIG" ] && [ -f "$SCRIPT_DIR/configs/opencode.json" ]; then
   cp "$SCRIPT_DIR/configs/opencode.json" "$OPENCODE_CONFIG"
-else
-  # Patch existing opencode.json with Web Search MCP & AGENTS.md instruction
-  python3 -c "
+  sed -i "s|/home/[^/]*|/home/$USER|g" "$OPENCODE_CONFIG" 2>/dev/null || true
+fi
+
+# Patch opencode.json with Web Search MCP & AGENTS.md instruction
+python3 -c "
 import json, os
 p = '$OPENCODE_CONFIG'
 if os.path.exists(p):
@@ -353,7 +355,6 @@ if os.path.exists(p):
         with open(p, 'w', encoding='utf-8') as f: json.dump(d, f, indent=2)
     except Exception: pass
 " 2>/dev/null || true
-fi
 
 # Deploy Concat Video Editor MCP Bridge for OpenCode
 if command -v powershell.exe &>/dev/null; then

@@ -148,7 +148,7 @@
       "type": "local",
       "command": [
         "python3",
-        "/home/IDSP35929/farhan/Ultimate-WSL-Environment-Setup/scripts/concat_mcp.py"
+        "/home/han/Ultimate-WSL-Environment-Setup/scripts/concat_mcp.py"
       ],
       "environment": {
         "CONCAT_TOKEN": "kucing123"
@@ -158,13 +158,13 @@
       "type": "local",
       "command": [
         "node",
-        "/home/IDSP35929/.config/opencode/mcp-websearch.js"
+        "/home/han/.config/opencode/mcp-websearch.js"
       ]
     }
   },
   "instructions": [
-    "/home/IDSP35929/.config/opencode/AGENTS.md",
-    "/home/IDSP35929/.config/opencode/concat_rules.md"
+    "/home/han/.config/opencode/AGENTS.md",
+    "/home/han/.config/opencode/concat_rules.md"
   ],
   "plugin": []
 }

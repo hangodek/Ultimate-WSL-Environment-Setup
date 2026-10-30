@@ -50,14 +50,16 @@
   }
   ```
 
-## 4. Typography & Subtitle Standards
+## 4. Typography & Subtitle Standards: Multiline Wrapping Protocol (`\n`)
 - **Headline POV / Judul Pembuka:**
+  - Wajib Multiline (`\n`): DILARANG 1 baris panjang yang meluber keluar kanvas. Selalu pecah dengan Enter (`\n`) menjadi 2 baris (misal `"POV: Diajak Temen\nJalan Sore di Trotoar"`).
   - Teks: Hitam bersih (`color: "#000000"`).
   - Font: Standar sans (`Arial`, `Cabinet Grotesk`), ketebalan proporsional dan tidak tebal berlebih (`fontWeight: 700`, `fontSize: 0.055`).
   - Container Pill: Balutan rounded fill putih (`background: "#ffffff"`, `backgroundRadius: 0.015`, `backgroundPaddingX: 0.025`, `backgroundPaddingY: 0.012`).
   - Posisi: Bagian atas kanvas (`offsetY: -0.40`, `offsetX: 0.0`).
 - **Floating Speech Dialogue (Kucing):**
   - Konsep: Melayang dekat posisi kucing, bukan subtitle film di bawah layar.
+  - Aturan Maksimal 2–3 Kata per Baris (Wajib Enter `\n`): DILARANG teks 1 baris panjang karena akan terpotong di tepi kanvas (misal *"ro, temenin..."*). Pecah teks dengan `\n` (misal `"Bro, temenin\njalan sore yuk..."`).
   - Kucing Kiri: `offsetX: -0.22`, `offsetY: -0.05` s.d. `0.02` (tepat di atas kepala kucing kiri).
   - Kucing Kanan: `offsetX: 0.22`, `offsetY: -0.05` s.d. `0.02` (tepat di atas kepala kucing kanan).
   - Kucing Bertingkat / Tangga: Sesuaikan sumbu Y mengikuti posisi visual kucing masing-masing.
