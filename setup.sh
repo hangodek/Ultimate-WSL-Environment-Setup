@@ -311,8 +311,11 @@ fi
 if [ -d "$SCRIPT_DIR/skills" ]; then
   for s in agystack karpathy ponytail; do
     if [ -d "$SCRIPT_DIR/skills/$s" ]; then
+      rm -rf "$HOME/.config/opencode/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/opencode/skills/"
+      rm -rf "$HOME/.config/antigravity/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/antigravity/skills/"
+      rm -rf "$HOME/.agents/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.agents/skills/"
     fi
   done
