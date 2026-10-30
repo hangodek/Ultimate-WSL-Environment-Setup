@@ -199,7 +199,8 @@ if ($codeCmd) {
         "eamodio.gitlens",
         "ms-azuretools.vscode-docker",
         "esbenp.prettier-vscode",
-        "usernamehw.errorlens"
+        "usernamehw.errorlens",
+        "cybersader.terminal-image-paste"
     )
 
     Write-Host "  Installing essential VS Code extensions..." -ForegroundColor DarkGray
@@ -269,6 +270,36 @@ $colorCustoms["terminal.ansiBrightWhite"] = "#eceff4"
 $settingsJson = $settingsObj | ConvertTo-Json -Depth 10
 Set-Content -Path $vscodeSettingsFile -Value $settingsJson -Encoding UTF8
 Write-Host "  ✓ Configured VS Code settings in $vscodeSettingsFile" -ForegroundColor Green
+
+# Configure VS Code keybindings.json (Direct Ctrl+Shift+V Image Paste into Terminal)
+$vscodeKeybindingsFile = Join-Path -Path $vscodeUserDir -ChildPath "keybindings.json"
+$keybindingsList = @()
+if (Test-Path -Path $vscodeKeybindingsFile) {
+    try {
+        $rawKb = Get-Content -Path $vscodeKeybindingsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($rawKb) {
+            $keybindingsList = @($rawKb)
+        }
+    } catch {}
+}
+$hasImageBinding = $false
+foreach ($kb in $keybindingsList) {
+    if ($kb.command -eq "terminal-paste-image.pasteImage") {
+        $hasImageBinding = $true
+        break
+    }
+}
+if (-not $hasImageBinding) {
+    $newBinding = [PSCustomObject]@{
+        key = "ctrl+shift+v"
+        command = "terminal-paste-image.pasteImage"
+        when = "terminalFocus"
+    }
+    $keybindingsList += $newBinding
+    $kbJson = $keybindingsList | ConvertTo-Json -Depth 5
+    Set-Content -Path $vscodeKeybindingsFile -Value $kbJson -Encoding UTF8
+    Write-Host "  ✓ Configured VS Code keybindings (Ctrl+Shift+V terminal image paste)" -ForegroundColor Green
+}
 
 # 5. Configure Windows Terminal (JetBrainsMono Nerd Font & Nord Theme)
 Write-Host ""

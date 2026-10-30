@@ -259,6 +259,36 @@ if [ -f "$SCRIPT_DIR/scripts/paste-img" ]; then
   chmod +x "$HOME/.local/bin/paste-img"
 fi
 
+# Auto-install VS Code Terminal Image Paste extension and configure keybindings
+if command -v code &>/dev/null; then
+  code --install-extension cybersader.terminal-image-paste --force 2>/dev/null || true
+fi
+if command -v powershell.exe &>/dev/null; then
+  powershell.exe -NoProfile -Command "
+  try {
+    \$kbPath = Join-Path \$env:APPDATA 'Code\User\keybindings.json'
+    \$kbDir = Split-Path \$kbPath
+    if (!(Test-Path \$kbDir)) { New-Item -ItemType Directory -Path \$kbDir -Force | Out-Null }
+    \$list = @()
+    if (Test-Path \$kbPath) {
+      try { \$list = @(Get-Content \$kbPath -Raw -Encoding UTF8 | ConvertFrom-Json) } catch {}
+    }
+    \$exists = \$false
+    foreach (\$item in \$list) {
+      if (\$item.command -eq 'terminal-paste-image.pasteImage') { \$exists = \$true; break }
+    }
+    if (!\$exists) {
+      \$list += [PSCustomObject]@{
+        key = 'ctrl+shift+v'
+        command = 'terminal-paste-image.pasteImage'
+        when = 'terminalFocus'
+      }
+      \$list | ConvertTo-Json -Depth 5 | Set-Content \$kbPath -Encoding UTF8
+    }
+  } catch {}
+  " 2>/dev/null || true
+fi
+
 # Deploy MCP Web Search & URL Fetcher (Zero-Keyless Real-Time Grounding)
 if [ -f "$SCRIPT_DIR/scripts/mcp-websearch.js" ]; then
   cp "$SCRIPT_DIR/scripts/mcp-websearch.js" "$HOME/.config/opencode/mcp-websearch.js"
