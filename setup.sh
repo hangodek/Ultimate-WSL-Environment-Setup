@@ -252,6 +252,13 @@ mkdir -p "$HOME/.config/antigravity/skills" "$HOME/.config/antigravity/commands"
 mkdir -p "$HOME/.agents/skills"
 mkdir -p "$HOME/.config/ponytail"
 
+# Deploy paste-img CLI (Extract Windows clipboard screenshot to WSL path)
+if [ -f "$SCRIPT_DIR/scripts/paste-img" ]; then
+  mkdir -p "$HOME/.local/bin"
+  cp "$SCRIPT_DIR/scripts/paste-img" "$HOME/.local/bin/paste-img"
+  chmod +x "$HOME/.local/bin/paste-img"
+fi
+
 # Deploy MCP Web Search & URL Fetcher (Zero-Keyless Real-Time Grounding)
 if [ -f "$SCRIPT_DIR/scripts/mcp-websearch.js" ]; then
   cp "$SCRIPT_DIR/scripts/mcp-websearch.js" "$HOME/.config/opencode/mcp-websearch.js"

@@ -157,7 +157,7 @@ db-stop    # Stops all dev database containers
 db-status  # Displays running Docker containers
 ```
 
-### 6. AI Development Tools
+### 6. AI Development Tools & Image Pasting
 - **Antigravity CLI**:
   ```bash
   agy      # Launch Antigravity interactive assistant
@@ -169,6 +169,10 @@ db-status  # Displays running Docker containers
   oca      # Launch OpenCode in autonomous mode
   ```
 - **9router**: Automatically runs in background on port `20128` as a systemd service.
+- **Pasting Images into WSL Terminal (Screenshots / Claude / OpenCode)**:
+  - **VS Code Extension (Recommended)**: Install `Terminal Paste Image` (`doonfrs.terminal-paste-image-vscode`). After copying/screenshotting (`Win + Shift + S`), press **`Ctrl + Alt + V`** in the terminal to paste the saved image path directly into your prompt.
+  - **CLI Helper**: Run `paste-img` to save clipboard image directly to `~/.cache/pasted-images/` and output its WSL path (e.g. `oc "explain this: $(paste-img)"`).
+  - **Drag & Drop**: Hold `Shift` while dragging any image file from VS Code Explorer sidebar directly into the terminal cursor.
 
 ---
 

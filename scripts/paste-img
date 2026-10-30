@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# paste-img: Extract image from Windows clipboard and save to WSL path
+set -e
+
+DEST_DIR="${1:-$HOME/.cache/pasted-images}"
+mkdir -p "$DEST_DIR"
+
+FILENAME="img_$(date +%Y%m%d_%H%M%S).png"
+DEST_PATH="$DEST_DIR/$FILENAME"
+
+# Windows path translation
+WIN_DEST=$(wslpath -w "$DEST_PATH" 2>/dev/null || echo "")
+
+if [ -z "$WIN_DEST" ]; then
+  echo "Error: Cannot convert path to Windows format" >&2
+  exit 1
+fi
+
+# Use PowerShell to extract clipboard image and save as PNG
+powershell.exe -NoProfile -Command "
+Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
+    \$img = [System.Windows.Forms.Clipboard]::GetImage()
+    \$img.Save('$WIN_DEST', [System.Drawing.Imaging.ImageFormat]::Png)
+    \$img.Dispose()
+    exit 0
+} else {
+    exit 1
+}
+" 2>/dev/null
+
+if [ -f "$DEST_PATH" ] && [ -s "$DEST_PATH" ]; then
+  echo "$DEST_PATH"
+else
+  echo "Error: No image found in clipboard" >&2
+  exit 1
+fi
