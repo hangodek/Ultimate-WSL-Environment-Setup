@@ -1,0 +1,170 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": "notify",
+  "provider": {
+    "9router": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:20128/v1",
+        "apiKey": "sk-760b09ec71ba9ff7-dfemsd-30ee549c"
+      },
+      "models": {
+        "ag/gemini-3.8-flash-low": {
+          "name": "ag/gemini-3.8-flash-low",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ag/gemini-3.8-flash-medium": {
+          "name": "ag/gemini-3.8-flash-medium",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ag/gemini-3.8-flash-high": {
+          "name": "ag/gemini-3.8-flash-high",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ag/claude-sonnet-4-6": {
+          "name": "ag/claude-sonnet-4-6",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "oc/big-pickle": {
+          "name": "oc/big-pickle",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "oc/deepseek-v4-flash-free": {
+          "name": "oc/deepseek-v4-flash-free",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "oc/muse-spark-1.3-contributor-free": {
+          "name": "oc/muse-spark-1.3-contributor-free",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "MainCombo": {
+          "name": "MainCombo",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini/gemini-3.8-flash": {
+          "name": "gemini/gemini-3.8-flash",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ag/claude-opus-4-6-thinking": {
+          "name": "ag/claude-opus-4-6-thinking",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "model": "9router/ag/gemini-3.8-flash-low",
+  "websearch": {
+    "provider": "random"
+  },
+  "agent": {
+    "explorer": {
+      "description": "Fast explorer subagent for codebase exploration",
+      "mode": "subagent",
+      "model": "9router/ag/gemini-3.8-flash-low"
+    }
+  },
+  "mcp": {
+    "concat": {
+      "type": "local",
+      "command": [
+        "python3",
+        "/home/IDSP35929/farhan/Ultimate-WSL-Environment-Setup/scripts/concat_mcp.py"
+      ],
+      "environment": {
+        "CONCAT_TOKEN": "kucing123"
+      }
+    },
+    "websearch": {
+      "type": "local",
+      "command": [
+        "node",
+        "/home/IDSP35929/.config/opencode/mcp-websearch.js"
+      ]
+    }
+  },
+  "instructions": [
+    "/home/IDSP35929/.config/opencode/AGENTS.md",
+    "/home/IDSP35929/.config/opencode/concat_rules.md"
+  ],
+  "plugin": []
+}

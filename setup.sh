@@ -213,12 +213,19 @@ alias agyd='agy --dangerously-skip-permissions'
 EOF
 fi
 
-echo "=== 10. Install OpenCode CLI & Aliases ==="
+echo "=== 10. Install OpenCode v2 Major Release & AI Agentic Architecture ==="
 if ! command -v opencode &>/dev/null && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
-  echo "Installing OpenCode CLI..."
-  curl -fsSL https://opencode.ai/install | bash || echo "OpenCode installer finished."
+  echo "Installing OpenCode v2 Major Release..."
+  curl -fsSL https://opencode.ai/v2/install | bash || echo "OpenCode v2 installer finished."
 else
-  echo "OpenCode CLI is already installed."
+  # Ensure it is upgraded to OpenCode v2
+  OC_VER=$(opencode --version 2>/dev/null || echo "")
+  if [[ "$OC_VER" == *"v1."* ]] || [[ "$OC_VER" == "1."* ]]; then
+    echo "Upgrading OpenCode to v2..."
+    curl -fsSL https://opencode.ai/v2/install | bash || echo "OpenCode v2 installer finished."
+  else
+    echo "OpenCode v2 is already installed ($OC_VER)."
+  fi
 fi
 
 # Ensure opencode is symlinked to ~/.local/bin and in PATH
@@ -237,6 +244,75 @@ export PATH="$HOME/.opencode/bin:$PATH"
 alias oc='opencode'
 alias oca='opencode --auto'
 EOF
+fi
+
+# Deploy Base OpenCode Directories
+mkdir -p "$HOME/.config/opencode/skills" "$HOME/.config/opencode/commands" "$HOME/.config/opencode/command"
+mkdir -p "$HOME/.config/antigravity/skills" "$HOME/.config/antigravity/commands"
+mkdir -p "$HOME/.agents/skills"
+mkdir -p "$HOME/.config/ponytail"
+
+# Deploy MCP Web Search & URL Fetcher (Zero-Keyless Real-Time Grounding)
+if [ -f "$SCRIPT_DIR/scripts/mcp-websearch.js" ]; then
+  cp "$SCRIPT_DIR/scripts/mcp-websearch.js" "$HOME/.config/opencode/mcp-websearch.js"
+  chmod +x "$HOME/.config/opencode/mcp-websearch.js"
+fi
+
+# Deploy Ponytail Ultra Configuration (Default ON)
+if [ -f "$SCRIPT_DIR/configs/ponytail.json" ]; then
+  cp "$SCRIPT_DIR/configs/ponytail.json" "$HOME/.config/ponytail/config.json"
+fi
+
+# Deploy Core Engineering Standards (AGENTS.md)
+if [ -f "$SCRIPT_DIR/configs/AGENTS.md" ]; then
+  cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
+  cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.config/antigravity/AGENTS.md"
+  cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.agents/AGENTS.md"
+fi
+
+# Deploy 3 Core Skills (agystack, karpathy, ponytail)
+if [ -d "$SCRIPT_DIR/skills" ]; then
+  for s in agystack karpathy ponytail; do
+    if [ -d "$SCRIPT_DIR/skills/$s" ]; then
+      cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/opencode/skills/"
+      cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/antigravity/skills/"
+      cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.agents/skills/"
+    fi
+  done
+fi
+
+# Deploy Slash Commands (/agystack, /karpathy, /ponytail)
+if [ -d "$SCRIPT_DIR/commands" ]; then
+  cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/commands/" 2>/dev/null || true
+  cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/command/" 2>/dev/null || true
+  cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/antigravity/commands/" 2>/dev/null || true
+fi
+
+# Ensure default opencode.json exists and has MCP Websearch + Core Instructions configured
+OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
+if [ ! -f "$OPENCODE_CONFIG" ] && [ -f "$SCRIPT_DIR/configs/opencode.json" ]; then
+  cp "$SCRIPT_DIR/configs/opencode.json" "$OPENCODE_CONFIG"
+else
+  # Patch existing opencode.json with Web Search MCP & AGENTS.md instruction
+  python3 -c "
+import json, os
+p = '$OPENCODE_CONFIG'
+if os.path.exists(p):
+    try:
+        with open(p, 'r', encoding='utf-8') as f: d = json.load(f)
+        mcp = d.setdefault('mcp', {})
+        if 'websearch' not in mcp:
+            mcp['websearch'] = {
+                'type': 'local',
+                'command': ['node', os.path.expanduser('~/.config/opencode/mcp-websearch.js')]
+            }
+        inst = d.setdefault('instructions', [])
+        agents_rule = os.path.expanduser('~/.config/opencode/AGENTS.md')
+        if agents_rule not in inst:
+            inst.insert(0, agents_rule)
+        with open(p, 'w', encoding='utf-8') as f: json.dump(d, f, indent=2)
+    except Exception: pass
+" 2>/dev/null || true
 fi
 
 # Deploy Concat Video Editor MCP Bridge for OpenCode
@@ -263,7 +339,6 @@ except Exception: pass
         mkdir -p "$HOME/.config/opencode"
         cp "$SCRIPT_DIR/configs/concat_rules.md" "$HOME/.config/opencode/concat_rules.md" 2>/dev/null || true
       fi
-      OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
       if [ -f "$OPENCODE_CONFIG" ] && [ -n "$WIN_PY_PATH" ]; then
         python3 -c "
 import json, subprocess
@@ -314,7 +389,6 @@ if not d.get('server', {}).get('token'):
     except Exception: pass
 " 2>/dev/null || true
 
-  OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
   if [ -f "$OPENCODE_CONFIG" ] && [ -f "$SCRIPT_DIR/scripts/concat_mcp.py" ]; then
     python3 -c "
 import json

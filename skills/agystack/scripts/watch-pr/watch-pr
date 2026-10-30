@@ -1,0 +1,10 @@
+#!/usr/bin/env bun
+/**
+ * Executes via bun runtime.
+ * Automated PR babysitting: watches CI checks, review threads, and drives PRs to merge readiness.
+ */
+import { ensureDependenciesInstalled } from "../bootstrap.ts";
+
+ensureDependenciesInstalled();
+const { main } = await import("./cli.ts");
+process.exitCode = await main(process.argv.slice(2));
