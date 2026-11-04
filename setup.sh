@@ -249,6 +249,7 @@ fi
 # Deploy Base OpenCode Directories
 mkdir -p "$HOME/.config/opencode/skills" "$HOME/.config/opencode/commands" "$HOME/.config/opencode/command"
 mkdir -p "$HOME/.config/antigravity/skills" "$HOME/.config/antigravity/commands"
+mkdir -p "$HOME/.claude/skills" "$HOME/.claude/commands"
 mkdir -p "$HOME/.agents/skills"
 mkdir -p "$HOME/.config/ponytail"
 
@@ -307,25 +308,28 @@ if [ -f "$SCRIPT_DIR/configs/AGENTS.md" ]; then
   cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.agents/AGENTS.md"
 fi
 
-# Deploy 3 Core Skills (agystack, karpathy, ponytail)
+# Deploy Core Skills (agystack, karpathy, ponytail, hallmark)
 if [ -d "$SCRIPT_DIR/skills" ]; then
-  for s in agystack karpathy ponytail; do
+  for s in $(ls -1 "$SCRIPT_DIR/skills"); do
     if [ -d "$SCRIPT_DIR/skills/$s" ]; then
       rm -rf "$HOME/.config/opencode/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/opencode/skills/"
       rm -rf "$HOME/.config/antigravity/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.config/antigravity/skills/"
+      rm -rf "$HOME/.claude/skills/$s"
+      cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.claude/skills/"
       rm -rf "$HOME/.agents/skills/$s"
       cp -r "$SCRIPT_DIR/skills/$s" "$HOME/.agents/skills/"
     fi
   done
 fi
 
-# Deploy Slash Commands (/agystack, /karpathy, /ponytail)
+# Deploy Slash Commands (/agystack, /karpathy, /ponytail, /hallmark)
 if [ -d "$SCRIPT_DIR/commands" ]; then
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/commands/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/command/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/antigravity/commands/" 2>/dev/null || true
+  cp "$SCRIPT_DIR/commands/"*.md "$HOME/.claude/commands/" 2>/dev/null || true
 fi
 
 # Ensure default opencode.json exists and has MCP Websearch + Core Instructions configured
@@ -459,6 +463,11 @@ if ! command -v 9router &>/dev/null; then
   $HOME/.local/bin/mise exec node -- npm install -g 9router || npm install -g 9router || echo "9router installation finished."
 else
   echo "9router is already installed."
+fi
+
+# Ensure puppeteer-core is installed globally for Hallmark v2 UI sloplint & rendering checks
+if command -v npm &>/dev/null; then
+  npm list -g puppeteer-core &>/dev/null || npm install -g puppeteer-core 2>/dev/null || true
 fi
 
 # Configure 9router system-level systemd service to auto-start on WSL boot
