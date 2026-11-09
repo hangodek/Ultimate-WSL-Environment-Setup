@@ -308,7 +308,7 @@ if [ -f "$SCRIPT_DIR/configs/AGENTS.md" ]; then
   cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.agents/AGENTS.md"
 fi
 
-# Deploy Core Skills (agystack, karpathy, ponytail, hallmark)
+# Deploy Core Skills (agystack, karpathy, ponytail, hallmark, humanizer)
 if [ -d "$SCRIPT_DIR/skills" ]; then
   for s in $(ls -1 "$SCRIPT_DIR/skills"); do
     if [ -d "$SCRIPT_DIR/skills/$s" ]; then
@@ -324,7 +324,7 @@ if [ -d "$SCRIPT_DIR/skills" ]; then
   done
 fi
 
-# Deploy Slash Commands (/agystack, /karpathy, /ponytail, /hallmark)
+# Deploy Slash Commands (/agystack, /karpathy, /ponytail, /hallmark, /humanizer)
 if [ -d "$SCRIPT_DIR/commands" ]; then
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/commands/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/command/" 2>/dev/null || true
