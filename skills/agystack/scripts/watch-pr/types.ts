@@ -1,4 +1,3 @@
-// Upstream agystack engine script (do not edit directly)
 declare const prNumberBrand: unique symbol;
 export type PrNumber = number & { readonly [prNumberBrand]: "PrNumber" };
 export type NonEmpty<T> = readonly [T, ...T[]];

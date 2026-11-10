@@ -25,13 +25,13 @@ Always operate on the most direct, authoritative surface for the task:
 | `environment: "local"` | `Workspace: "inherit"` (default parent workspace) |
 | Worker iteration / message passing | `send_message` with `Recipient` and `Message` |
 | Parallel fan-out (Local N <= 8) | Single `invoke_subagent` call with multiple entries in `Subagents` array |
-| Parallel fan-out (Cloud N > 8) | `python3 "$(find ~/.gemini/config/plugins/agystack .agents/plugins/agystack skills/agystack/swarm -name "cloud_dispatch.py" 2>/dev/null | head -1)" --manifest <manifest-json> --parallelism 16` |
-| Cloud container worker | `python skills/agystack/swarm/scripts/cloud_worker.py` entrypoint in Cloud Run |
+| Parallel fan-out (Cloud N > 8) | `python3 "$(find ~/.gemini/config/plugins/agystack .agents/plugins/agystack skills/swarm -name "cloud_dispatch.py" 2>/dev/null | head -1)" --manifest <manifest-json> --parallelism 16` |
+| Cloud container worker | `python skills/swarm/scripts/cloud_worker.py` entrypoint in Cloud Run |
 | `AskQuestion` | `ask_question` tool for interactive questions |
 | Background Wake / Scheduling | `schedule` tool (one-shot timer `DurationSeconds` or recurring `CronExpression`) |
 | Background processes | `run_command` (async) + `manage_task` (status/kill/input) with reactive wakeup |
 | Subagent lifecycle management | `manage_subagents` with `Action: "list"`, `"kill"`, or `"kill_all"` |
-| `/deslop` | Bundled natively in this plugin under `skills/agystack/deslop/SKILL.md` |
+| `/deslop` | Bundled natively in this plugin under `skills/deslop/SKILL.md` |
 | Visual parity / UI diffs | `generate_image` / visual diffs / artifact carousels (`<!-- slide -->`) |
 | Performance traces / Benchmarks | Profiling capture (`cpuprofile`, `trace`, heap snapshot) via `run_command` + `perf_report.md` |
 | Scratch / temporary storage | `<appDataDir>/brain/<conversation-id>/scratch/` |
@@ -175,25 +175,39 @@ Antigravity subagents use native `invoke_subagent` model tiers. Model tiers (`in
 | Deep judgment, prose, architecture | `inherit` or `pro` |
 | Multi-model review panels | Diverse combination across `inherit`, `flash`, and `pro` |
 
-Read per-role overrides from `~/.gemini/config/plugins/agystack/rules/agystack-models.md` (or `.agents/plugins/agystack/rules/agystack-models.md`). If a line is missing, use the defaults above.
+Read per-role overrides from `~/.gemini/config/plugins/agystack/agystack-models.md` (or `.agents/plugins/agystack/agystack-models.md`). If a line is missing, use the defaults above.
 
 Keep panels diverse across available tiers (`inherit`, `flash`, `pro`). One subagent runs per list entry.
 
-## Antigravity `/boost` vs agystack Multi-Agent Workflows
+## Antigravity Slash Commands & Multi-Agent Capabilities
 
-`/boost` is Antigravity's native single-agent thinking enhancer, allocating increased inference compute budget for in-context reasoning within a single session.
+### User-Facing Slash Commands vs Programmatic Primitives
 
-agystack skills (`/interrogate`, `/arena`, `/architect`, `/swarm`) are multi-agent engineering workflows. They orchestrate independent subagents across isolated context windows, diverse model tiers, and segregated workspaces with automated verification and synthesis.
+There is a strict boundary between user-facing slash commands and programmatic agent tool primitives:
+- **User-Facing Slash Commands (`/boost`, `/teamwork-preview`, `/interrogate`, etc.)**: UI shortcuts entered directly by human users into the Antigravity chat prompt. Agents cannot execute slash commands as tool calls; agents recommend or suggest that the user invoke slash commands when appropriate, or initiate the underlying programmatic workflows.
+- **Programmatic Primitives (`invoke_subagent`, `run_command`, `schedule`, `ask_question`)**: Callable tool primitives executed by agents within tool execution turns. Automated multi-agent workflows, code reviews, and background tasks are implemented programmatically using these tools.
+
+### `/boost`
+
+`/boost` is Antigravity's multi-agent reasoning pipeline for deep thinking, strategic planning, multiple perspectives, and rigorous verification. It dynamically orchestrates specialized reasoning stages and verification passes to tackle complex architectural questions and pressure-test solutions before implementation.
+
+### `/teamwork-preview`
+
+`/teamwork-preview` is Antigravity's platform capability for collaborative agent teams working together on large projects with autonomous specialist roles. It coordinates multiple agents operating in parallel across distinct functional specializations (such as design, implementation, testing, and review) to drive multi-phase efforts to completion.
+
+### agystack Skills vs Native Platform Modes
+
+agystack skills (`/interrogate`, `/arena`, `/architect`, `/swarm`) build directly on Antigravity's programmatic primitives (`invoke_subagent`, `run_command`, `schedule`, artifacts). They orchestrate independent subagents across isolated context windows, diverse model tiers (`pro`, `flash`, `inherit`), and segregated workspaces with automated verification and synthesis.
 
 ## Paths
 
 | Artifact / Config | Antigravity Path |
 | --- | --- |
-| Role models configuration | `~/.gemini/config/plugins/agystack/rules/agystack-models.md` |
+| Role models configuration | `~/.gemini/config/plugins/agystack/agystack-models.md` |
 | Runtime execution config | `~/.gemini/config/plugins/agystack/agystack-runtime.json` |
 | Agent conversation transcripts | `<appDataDir>/brain/<conversation-id>/.system_generated/logs/transcript.jsonl` (discovered across `~/.gemini/antigravity/brain/` and `~/.gemini/antigravity-ide/brain/`) |
 | Session artifacts | `<appDataDir>/brain/<conversation-id>/` |
-| Cloud worker scripts | `skills/agystack/swarm/scripts/` |
+| Cloud worker scripts | `skills/swarm/scripts/` |
 | Project-local skills | `.agents/skills/` in the project, or this plugin's `skills/` |
 | User global skills | `~/.gemini/config/skills/` or `~/.gemini/config/plugins/agystack/skills/` |
 

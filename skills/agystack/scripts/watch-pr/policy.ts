@@ -1,4 +1,3 @@
-// Upstream agystack engine script (do not edit directly)
 import { WatcherQueryError, resolveChecks } from "./github.ts";
 import type * as T from "./types.ts";
 import { nonEmpty } from "./types.ts";

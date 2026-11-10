@@ -1,4 +1,3 @@
-// Upstream agystack engine script (do not edit directly)
 import { describe, expect, it } from "bun:test";
 import { WatcherQueryError } from "./github.ts";
 import {

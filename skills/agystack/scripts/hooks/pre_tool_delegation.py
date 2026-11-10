@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# Upstream agystack engine script (do not edit directly)
 """
 Antigravity PreToolUse lifecycle hook for coordinator code delegation.
 Intercepts direct write_to_file and replace_file_content tool calls in coordinator sessions
