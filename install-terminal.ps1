@@ -377,7 +377,7 @@ foreach ($wtSettingsFile in $wtSettingsCandidates) {
             Write-Host "  ✓ Configured Windows Terminal settings at $wtSettingsFile" -ForegroundColor Green
             $configuredWt = $true
         } catch {
-            Write-Host "  ⚠️ Could not update Windows Terminal settings at $wtSettingsFile: $($_.Exception.Message)" -ForegroundColor DarkYellow
+            Write-Host "  ⚠️ Could not update Windows Terminal settings at ${wtSettingsFile}: $($_.Exception.Message)" -ForegroundColor DarkYellow
         }
     }
 }
