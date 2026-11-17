@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Automated Windows Environment Setup for WSL (VS Code + Windows Terminal + JetBrainsMono Nerd Font + Nord Theme + .wslconfig)
 .DESCRIPTION
