@@ -85,7 +85,21 @@ function Install-JetBrainsNerdFont {
 
     $existing = (Get-ChildItem -Path $userFontsDir, $winFontsDir -Filter "*JetBrains*Nerd*.ttf" -ErrorAction SilentlyContinue)
     if ($existing -and $existing.Count -gt 0) {
-        Write-Host " [Already Installed ($($existing.Count) font files found)]" -ForegroundColor Green
+        # Font files existing is not enough: if they were copied without being
+        # registered (e.g. by setup.sh sync), every Windows app reports "font not found".
+        $regKey = "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"
+        $regProps = Get-ItemProperty -Path $regKey -ErrorAction SilentlyContinue
+        $regJet = @($regProps.PSObject.Properties | Where-Object { $_.Name -like "JetBrainsMonoNerdFont*" })
+        if ($regJet.Count -eq 0) {
+            Write-Host "  [Font files found but NOT registered in font registry - fixing...]" -ForegroundColor Yellow
+            foreach ($font in $existing) {
+                $fontName = $font.BaseName.Replace("-", " ") + " (TrueType)"
+                New-ItemProperty -Path $regKey -Name $fontName -Value $font.FullName -PropertyType String -Force | Out-Null
+            }
+            Write-Host "  ✓ Registered $($existing.Count) JetBrainsMono Nerd Font files in the Windows font registry." -ForegroundColor Green
+        } else {
+            Write-Host " [Already Installed ($($existing.Count) font files found)]" -ForegroundColor Green
+        }
         return
     }
     Write-Host " [Not Found]" -ForegroundColor Yellow

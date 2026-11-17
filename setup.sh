@@ -599,11 +599,21 @@ if [ ! -f "$HOME/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf" ]; then
 fi
 
 # Auto-sync fonts to Windows host user font directory if running in WSL
+# Files alone are not enough: they MUST be registered in the per-user font
+# registry (HKCU\...\Fonts) or every Windows terminal reports "font not found".
 if [ -d "/mnt/c/Users" ]; then
   for win_user_fonts in /mnt/c/Users/*/AppData/Local/Microsoft/Windows/Fonts; do
-    if [ -d "$win_user_fonts" ] && [ ! -f "$win_user_fonts/JetBrainsMonoNerdFont-Regular.ttf" ]; then
-      echo "Syncing JetBrainsMono Nerd Font to Windows user fonts ($win_user_fonts)..."
-      cp -u "$HOME/.local/share/fonts"/JetBrainsMonoNerdFont*.ttf "$win_user_fonts/" 2>/dev/null || true
+    if [ -d "$win_user_fonts" ]; then
+      if [ ! -f "$win_user_fonts/JetBrainsMonoNerdFont-Regular.ttf" ]; then
+        echo "Syncing JetBrainsMono Nerd Font to Windows user fonts ($win_user_fonts)..."
+        cp -u "$HOME/.local/share/fonts"/JetBrainsMonoNerdFont*.ttf "$win_user_fonts/" 2>/dev/null || true
+      fi
+      if [ -f "$win_user_fonts/JetBrainsMonoNerdFont-Regular.ttf" ] && command -v powershell.exe &>/dev/null; then
+        win_font_path=$(wslpath -w "$win_user_fonts" 2>/dev/null || echo "$win_user_fonts")
+        powershell.exe -NoProfile -Command "\$regKey='HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'; Get-ChildItem -Path '$win_font_path' -Filter 'JetBrainsMono*.ttf' | ForEach-Object { New-ItemProperty -Path \$regKey -Name (\$_.BaseName.Replace('-',' ') + ' (TrueType)') -Value \$_.FullName -PropertyType String -Force | Out-Null }" >/dev/null 2>&1 \
+          && echo "✓ JetBrainsMono Nerd Font registered in Windows font registry (per-user)." \
+          || echo "⚠️ Could not register fonts in Windows registry (run install-terminal.ps1 to fix)."
+      fi
     fi
   done
 fi
