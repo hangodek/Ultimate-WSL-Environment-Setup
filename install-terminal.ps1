@@ -60,12 +60,14 @@ function Install-WingetApp {
     }
 
     Write-Host " [Installing...]" -ForegroundColor Yellow
-    $installArgs = @("install", "--id", $PackageId, "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements")
+    # --source winget: skip the msstore source, which often fails with
+    # TLS errors (0x8a15005e) behind proxies/VPN/antivirus interception
+    $installArgs = @("install", "--id", $PackageId, "--exact", "--source", "winget", "--silent", "--accept-package-agreements", "--accept-source-agreements")
     $process = Start-Process -FilePath "winget" -ArgumentList $installArgs -Wait -PassThru -NoNewWindow
 
     if ($process.ExitCode -ne 0 -and $FallbackId) {
         Write-Host "  Trying fallback ID: $FallbackId..." -ForegroundColor Yellow
-        $fallbackArgs = @("install", "--id", $FallbackId, "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements")
+        $fallbackArgs = @("install", "--id", $FallbackId, "--exact", "--source", "winget", "--silent", "--accept-package-agreements", "--accept-source-agreements")
         $process = Start-Process -FilePath "winget" -ArgumentList $fallbackArgs -Wait -PassThru -NoNewWindow
     }
 
@@ -92,7 +94,7 @@ function Install-JetBrainsNerdFont {
     $wingetSuccess = $false
     if (Get-Command winget -ErrorAction SilentlyContinue) {
         Write-Host "  Trying WinGet package install..." -ForegroundColor DarkGray
-        $installArgs = @("install", "--id", "DEVCOM.JetBrainsMonoNerdFont", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements")
+        $installArgs = @("install", "--id", "DEVCOM.JetBrainsMonoNerdFont", "--exact", "--source", "winget", "--silent", "--accept-package-agreements", "--accept-source-agreements")
         $proc = Start-Process -FilePath "winget" -ArgumentList $installArgs -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
         if ($proc -and $proc.ExitCode -eq 0) {
             $wingetSuccess = $true
