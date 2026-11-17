@@ -1,7 +1,29 @@
 #!/bin/bash
-set -e
+# Tolerant execution: never abort mid-way on a single failed step
+# (apt mirrors, GitHub API, systemd availability etc. vary per machine)
+set +e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" 2>/dev/null && pwd)"
+
+# One-shot bootstrap: when run via `bash -c "$(curl ...)"` only this file is
+# downloaded, so fetch the repo assets (scripts/, configs/, skills/, commands/)
+# into a temp dir and run from there.
+if [ ! -f "$SCRIPT_DIR/scripts/concat_mcp.py" ]; then
+  echo "=== 0. Fetching setup assets from GitHub (one-shot mode) ==="
+  BOOTSTRAP_TMP="$(mktemp -d)"
+  if curl -fsSL "https://github.com/hangodek/Ultimate-WSL-Environment-Setup/archive/refs/heads/main.tar.gz" -o "$BOOTSTRAP_TMP/repo.tar.gz"; then
+    tar -xzf "$BOOTSTRAP_TMP/repo.tar.gz" -C "$BOOTSTRAP_TMP"
+    ASSET_DIR="$BOOTSTRAP_TMP/Ultimate-WSL-Environment-Setup-main"
+    if [ -f "$ASSET_DIR/scripts/concat_mcp.py" ]; then
+      SCRIPT_DIR="$ASSET_DIR"
+      echo "  ✓ Assets ready at $SCRIPT_DIR"
+    else
+      echo "  ⚠️ Could not extract repo assets — config/skills deployment will be skipped."
+    fi
+  else
+    echo "  ⚠️ Could not download repo assets — config/skills deployment will be skipped."
+  fi
+fi
 
 # Ensure local user binaries, Go binaries, and OpenCode binaries are in PATH during script execution
 export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.opencode/bin:$PATH"
@@ -471,7 +493,10 @@ if command -v npm &>/dev/null; then
 fi
 
 # Configure 9router system-level systemd service to auto-start on WSL boot
-sudo tee /etc/systemd/system/9router.service >/dev/null <<EOF
+# (only when systemd is actually running — plain WSL distros without
+# [boot] systemd=true have no systemd and would abort the setup here)
+if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running &>/dev/null; then
+  sudo tee /etc/systemd/system/9router.service >/dev/null <<EOF
 [Unit]
 Description=9router AI Gateway
 After=network.target
@@ -491,14 +516,20 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# Clean up obsolete user-level service if present
-systemctl --user stop 9router.service 2>/dev/null || true
-systemctl --user disable 9router.service 2>/dev/null || true
-rm -f ~/.config/systemd/user/9router.service
+  # Clean up obsolete user-level service if present
+  systemctl --user stop 9router.service 2>/dev/null || true
+  systemctl --user disable 9router.service 2>/dev/null || true
+  rm -f ~/.config/systemd/user/9router.service
 
-sudo systemctl daemon-reload
-sudo systemctl enable 9router.service
-sudo systemctl restart 9router.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable 9router.service
+  sudo systemctl restart 9router.service
+  echo "9router service installed and started (systemd)."
+else
+  echo "⚠️ systemd is not active in this WSL distro — 9router autostart service skipped."
+  echo "   Enable systemd via /etc/wsl.conf [boot] systemd=true, or run manually:"
+  echo "   ~/.local/bin/mise exec -- 9router --tray --no-browser --skip-update"
+fi
 
 echo "=== 12. Configure Case-Insensitive Bash Tab Completion ==="
 if ! grep -q 'completion-ignore-case' ~/.inputrc 2>/dev/null; then

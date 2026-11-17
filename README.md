@@ -70,8 +70,9 @@ Simply **double-click** `install.bat` in Windows File Explorer (or run `.\instal
 #### Method B: Single PowerShell One-Liner (No download required)
 Open **PowerShell** on Windows and run:
 ```powershell
-irm https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/install-terminal.ps1 | iex
+curl.exe -fsSL "https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/install-terminal.ps1" -o "$env:TEMP\install-terminal.ps1"; powershell -NoProfile -ExecutionPolicy Bypass -File "$env:TEMP\install-terminal.ps1"
 ```
+> **Note:** `irm ... | iex` intentionally not used — the script starts with a `param()` block, which `Invoke-Expression` cannot execute. Downloading to a temp file and running with `-File` is the reliable one-shot path.
 
 #### Method C: Manual PowerShell Execution
 ```powershell
@@ -96,6 +97,7 @@ Open any WSL terminal (or Windows Terminal running Ubuntu) and run:
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hangodek/Ultimate-WSL-Environment-Setup/main/setup.sh)"
 ```
+> The script auto-fetches its repo assets (`scripts/`, `configs/`, `skills/`, `commands/`) in one-shot mode, so no manual clone is needed. It runs tolerantly: a single failed step (apt mirror hiccup, systemd not enabled, etc.) will not abort the whole setup.
 
 #### Method B: Manual Run (If already cloned)
 ```bash
