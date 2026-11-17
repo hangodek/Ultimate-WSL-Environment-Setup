@@ -246,10 +246,18 @@ $settingsObj["terminal.integrated.cursorBlinking"] = $true
 $settingsObj["terminal.integrated.cursorStyle"] = "line"
 
 # Ensure custom Nord color overrides for integrated terminal
-if (-not $settingsObj.Contains("workbench.colorCustomizations")) {
-    $settingsObj["workbench.colorCustomizations"] = [ordered]@{}
+# Rebuild as a real dictionary: on re-runs, existing settings arrive as
+# PSCustomObject (from ConvertFrom-Json) which cannot be indexed with ["key"]
+$colorCustoms = [ordered]@{}
+if ($settingsObj.Contains("workbench.colorCustomizations")) {
+    $existingCustoms = $settingsObj["workbench.colorCustomizations"]
+    if ($existingCustoms -is [System.Collections.IDictionary]) {
+        foreach ($key in $existingCustoms.Keys) { $colorCustoms[$key] = $existingCustoms[$key] }
+    } elseif ($existingCustoms) {
+        foreach ($prop in $existingCustoms.PSObject.Properties) { $colorCustoms[$prop.Name] = $prop.Value }
+    }
 }
-$colorCustoms = $settingsObj["workbench.colorCustomizations"]
+$settingsObj["workbench.colorCustomizations"] = $colorCustoms
 $colorCustoms["terminal.background"] = "#2e3440"
 $colorCustoms["terminal.foreground"] = "#d8dee9"
 $colorCustoms["terminal.ansiBlack"] = "#3b4252"
