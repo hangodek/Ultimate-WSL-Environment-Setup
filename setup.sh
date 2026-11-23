@@ -330,7 +330,7 @@ if [ -f "$SCRIPT_DIR/configs/AGENTS.md" ]; then
   cp "$SCRIPT_DIR/configs/AGENTS.md" "$HOME/.agents/AGENTS.md"
 fi
 
-# Deploy Core Skills (agystack, karpathy, ponytail, hallmark, humanizer)
+# Deploy Core Skills (agystack, karpathy, ponytail, hallmark, humanizer, handoff)
 if [ -d "$SCRIPT_DIR/skills" ]; then
   for s in $(ls -1 "$SCRIPT_DIR/skills"); do
     if [ -d "$SCRIPT_DIR/skills/$s" ]; then
@@ -346,12 +346,18 @@ if [ -d "$SCRIPT_DIR/skills" ]; then
   done
 fi
 
-# Deploy Slash Commands (/agystack, /karpathy, /ponytail, /hallmark, /humanizer)
+# Deploy Slash Commands (/agystack, /karpathy, /ponytail, /hallmark, /humanizer, /handoff)
 if [ -d "$SCRIPT_DIR/commands" ]; then
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/commands/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/opencode/command/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.config/antigravity/commands/" 2>/dev/null || true
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.claude/commands/" 2>/dev/null || true
+fi
+
+# Deploy Auto-Handoff for Claude Code (session logs, SessionStart/UserPromptSubmit hooks,
+# CLAUDE.md block, settings.json hook entries). Idempotent; keeps the user's own settings.
+if [ -f "$SCRIPT_DIR/scripts/install-handoff.sh" ]; then
+  bash "$SCRIPT_DIR/scripts/install-handoff.sh" "$SCRIPT_DIR" || echo "  ⚠️ Auto-handoff install failed."
 fi
 
 # Ensure default opencode.json exists and has MCP Websearch + Core Instructions configured
