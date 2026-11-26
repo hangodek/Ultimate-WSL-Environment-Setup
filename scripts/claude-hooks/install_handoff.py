@@ -66,6 +66,14 @@ def merge_settings(claude_dir: Path) -> None:
                 }
             ],
         },
+        "PreCompact": {
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": f"python3 {hooks_dir / 'handoff-pre-compact.py'}",
+                }
+            ],
+        },
         "PostToolUse": {
             "hooks": [
                 {

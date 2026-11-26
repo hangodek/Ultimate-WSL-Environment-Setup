@@ -177,7 +177,9 @@ db-status  # Displays running Docker containers
   - **Drag & Drop**: Hold `Shift` while dragging any image file from VS Code Explorer sidebar directly into the terminal cursor.
 - **Auto-Handoff for Claude Code**: Session state is saved to disk, so a new chat continues where the last one stopped.
   - A `SessionStart` hook injects `~/.claude/session-logs/<project>/HANDOFF.md` into every new session (startup, resume, `/clear`, `/compact`).
-  - Fully automatic, no commands. A `PostToolUse`/`UserPromptSubmit` hook watches the context. At about **150k tokens** it has Claude save `HANDOFF.md` mid-task and keep working. `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000` (set in `settings.json` env) makes Claude Code auto-compact early without stopping, and the `SessionStart` hook re-injects `HANDOFF.md` after it. Tune with `HANDOFF_THRESHOLD`.
+  - Fully automatic, no commands. A `PostToolUse`/`UserPromptSubmit` hook estimates the context (last API usage plus tool results added since). At about **130k tokens** it has Claude save `HANDOFF.md` mid-task and keep working. Tune with `HANDOFF_THRESHOLD`.
+  - `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000` (set in `settings.json` env) makes Claude Code auto-compact early, without stopping.
+  - A `PreCompact` hook hands `HANDOFF.md` and handoff-style instructions to the compact summarizer, so the summary keeps goal, rules, done/remaining and the next step. After the compact, `HANDOFF.md` is re-injected (by `SessionStart`, or by the watch hook when `SessionStart` does not fire).
   - The `/handoff` command runs the same skill by hand.
   - Each session writes its own log, so parallel sessions in one project do not overwrite each other.
   - Deployed by `scripts/install-handoff.sh`. It merges into `~/.claude/settings.json` and `~/.claude/CLAUDE.md` without removing your own entries.

@@ -354,7 +354,7 @@ if [ -d "$SCRIPT_DIR/commands" ]; then
   cp "$SCRIPT_DIR/commands/"*.md "$HOME/.claude/commands/" 2>/dev/null || true
 fi
 
-# Deploy Auto-Handoff for Claude Code (session logs, SessionStart/PostToolUse hooks,
+# Deploy Auto-Handoff for Claude Code (session logs, SessionStart/PreCompact/PostToolUse hooks,
 # CLAUDE.md block, settings.json hook entries). Idempotent; keeps the user's own settings.
 if [ -f "$SCRIPT_DIR/scripts/install-handoff.sh" ]; then
   bash "$SCRIPT_DIR/scripts/install-handoff.sh" "$SCRIPT_DIR" || echo "  ⚠️ Auto-handoff install failed."

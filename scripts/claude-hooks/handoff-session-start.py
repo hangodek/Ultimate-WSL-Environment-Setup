@@ -28,6 +28,29 @@ def project_slug(cwd: str) -> str:
     return slug or "default"
 
 
+def mark_compact_seen(data: dict, _short_id: str) -> None:
+    """Tell handoff-context-watch.py this compact already got HANDOFF.md."""
+    session_id = re.sub(r"[^A-Za-z0-9_-]", "", str(data.get("session_id") or ""))
+    transcript = Path(str(data.get("transcript_path") or "")).expanduser()
+    if not session_id or not transcript.is_file():
+        return
+    with transcript.open("rb") as handle:
+        handle.seek(0, 2)
+        handle.seek(max(0, handle.tell() - 2_000_000))
+        lines = handle.read().decode("utf-8", errors="replace").splitlines()
+    for line in reversed(lines):
+        if '"compact_boundary"' in line:
+            try:
+                uuid = json.loads(line).get("uuid")
+            except ValueError:
+                return
+            if uuid:
+                state = LOG_ROOT / ".state"
+                state.mkdir(parents=True, exist_ok=True)
+                (state / f"{session_id}.compact").write_text(uuid, encoding="utf-8")
+            return
+
+
 def emit(context: str) -> None:
     payload = {
         "hookSpecificOutput": {
@@ -54,6 +77,9 @@ def main() -> None:
         f"[handoff] session log for this chat: "
         f"{project_dir / (date.today().isoformat() + '-' + short_id + '.md')}",
     ]
+
+    if data.get("source") == "compact":
+        mark_compact_seen(data, short_id)
 
     handoff_file = project_dir / "HANDOFF.md"
     if handoff_file.is_file():
