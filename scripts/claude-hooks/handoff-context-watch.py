@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-Claude Code UserPromptSubmit hook for auto-handoff.
+Claude Code PostToolUse/UserPromptSubmit hook for auto-handoff. No user action.
 
-Reads the latest assistant usage from the session transcript. When the context
-crosses HANDOFF_THRESHOLD (default 100000 tokens), it injects a one-time
-instruction asking Claude to run the handoff skill. A flag file per session
-keeps the instruction from repeating; the flag clears once usage drops back
-under the threshold (for example after /compact or /clear).
+Reads the latest usage from the transcript. Once the context crosses
+HANDOFF_THRESHOLD (default 150000 tokens), it injects one instruction, in the
+middle of the work, to save HANDOFF.md and keep going. Claude Code's own
+auto-compact (window set by CLAUDE_CODE_AUTO_COMPACT_WINDOW in settings.json)
+then shrinks the chat without stopping, and the SessionStart(compact) hook
+injects HANDOFF.md again. The flag resets when usage drops after the compact.
 
-Always exits 0. Any error results in an empty payload, never a blocked prompt.
+Always exits 0. Any error results in an empty payload, never a stuck session.
 """
 
 import json
@@ -19,7 +20,7 @@ from pathlib import Path
 
 LOG_ROOT = Path.home() / ".claude" / "session-logs"
 STATE_DIR = LOG_ROOT / ".state"
-DEFAULT_THRESHOLD = 100_000
+DEFAULT_THRESHOLD = 150_000
 TAIL_BYTES = 2_000_000
 USAGE_KEYS = ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens")
 
@@ -44,47 +45,41 @@ def last_context_tokens(transcript: Path):
     return None
 
 
-def emit(context: str = "") -> None:
-    if not context:
-        print("{}")
-        return
-    payload = {
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": context,
-        }
-    }
-    print(json.dumps(payload))
-
-
 def main() -> None:
     data = json.load(sys.stdin)
+    event = data.get("hook_event_name") or "PostToolUse"
     session_id = re.sub(r"[^A-Za-z0-9_-]", "", str(data.get("session_id") or ""))
     transcript = data.get("transcript_path")
     if not session_id or not transcript:
-        return emit()
+        return print("{}")
 
     threshold = int(os.environ.get("HANDOFF_THRESHOLD") or DEFAULT_THRESHOLD)
     tokens = last_context_tokens(Path(transcript).expanduser())
     if tokens is None:
-        return emit()
+        return print("{}")
 
     flag = STATE_DIR / session_id
     if tokens < threshold:
-        flag.unlink(missing_ok=True)
-        return emit()
+        flag.unlink(missing_ok=True)  # fresh, or just auto-compacted
+        return print("{}")
     if flag.exists():
-        return emit()
+        return print("{}")  # already saved in this compact cycle
 
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     flag.write_text(str(tokens), encoding="utf-8")
-    emit(
-        f"[handoff] This session's context is about {tokens // 1000}k tokens "
-        f"(limit {threshold // 1000}k). Finish the step in progress, then run the "
-        "`handoff` skill now: append the session log and overwrite HANDOFF.md. "
-        "Then tell the user: \"Handoff saved. Run /clear; the new session picks "
-        "this up automatically.\""
-    )
+    when = "now, between steps" if event == "PostToolUse" else "after you answer this prompt"
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": event,
+            "additionalContext": (
+                f"[handoff] Context is about {tokens // 1000}k tokens. Auto-compact "
+                f"will run soon. Silently save the `handoff` skill files {when} "
+                "(session log + HANDOFF.md: goal, what is done, exact next step). "
+                "Then KEEP WORKING on the current task. Do not stop, do not ask "
+                "the user anything, do not suggest /clear or a new session."
+            ),
+        }
+    }))
 
 
 if __name__ == "__main__":

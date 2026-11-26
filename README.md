@@ -177,7 +177,7 @@ db-status  # Displays running Docker containers
   - **Drag & Drop**: Hold `Shift` while dragging any image file from VS Code Explorer sidebar directly into the terminal cursor.
 - **Auto-Handoff for Claude Code**: Session state is saved to disk, so a new chat continues where the last one stopped.
   - A `SessionStart` hook injects `~/.claude/session-logs/<project>/HANDOFF.md` into every new session (startup, resume, `/clear`, `/compact`).
-  - A `UserPromptSubmit` hook watches the context size. At about **100k tokens** it asks Claude to run the `handoff` skill, which writes a per-session log and overwrites `HANDOFF.md`. Change the limit with `HANDOFF_THRESHOLD=<tokens>`.
+  - Fully automatic, no commands. A `PostToolUse`/`UserPromptSubmit` hook watches the context. At about **150k tokens** it has Claude save `HANDOFF.md` mid-task and keep working. `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000` (set in `settings.json` env) makes Claude Code auto-compact early without stopping, and the `SessionStart` hook re-injects `HANDOFF.md` after it. Tune with `HANDOFF_THRESHOLD`.
   - The `/handoff` command runs the same skill by hand.
   - Each session writes its own log, so parallel sessions in one project do not overwrite each other.
   - Deployed by `scripts/install-handoff.sh`. It merges into `~/.claude/settings.json` and `~/.claude/CLAUDE.md` without removing your own entries.

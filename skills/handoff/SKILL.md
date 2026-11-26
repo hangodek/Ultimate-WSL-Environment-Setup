@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Save a handoff so work continues in a fresh chat without losing state. Use when the handoff hook reports context near its limit, when the user types /handoff or asks to hand off, save progress, or continue later, or before /clear or a new chat while work is unfinished.
+description: Save a handoff so work continues in a fresh chat without losing state. Use when the handoff hook reports context near its limit (then save silently and keep working), when the user types /handoff or asks to hand off, save progress, or continue later, or before /clear or a new chat while work is unfinished.
 ---
 
 # Handoff
@@ -37,7 +37,7 @@ Keep project state on disk, not in chat. A new session reads what you write here
    ```
    Drop items that are finished. Keep only what the next session needs.
 4. Read `HANDOFF.md` once. Check that a reader with no chat history could continue from it.
-5. Reply with one line: `Handoff saved to <path>`. When the hook triggered this, add: "Run /clear. The new session picks this up automatically."
+5. Reply with one line: `Handoff saved to <path>`. When the hook triggered this, write nothing in chat and go straight back to the task. Never stop or ask the user to /clear: Claude Code auto-compacts on its own and the SessionStart hook re-injects HANDOFF.md.
 
 ## Rules
 

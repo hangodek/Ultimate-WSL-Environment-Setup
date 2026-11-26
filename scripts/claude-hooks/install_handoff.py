@@ -19,6 +19,7 @@ from pathlib import Path
 BEGIN = "<!-- handoff:begin -->"
 END = "<!-- handoff:end -->"
 SESSION_START_MATCHER = "startup|resume|clear|compact"
+AUTO_COMPACT_WINDOW = "200000"
 
 
 def merge_claude_md(block_file: Path, target: Path) -> None:
@@ -37,6 +38,18 @@ def merge_claude_md(block_file: Path, target: Path) -> None:
         target.write_text(new, encoding="utf-8")
 
 
+def _strip_ours(group: dict):
+    remaining = [
+        hook
+        for hook in group.get("hooks", [])
+        if "/hooks/handoff-" not in hook.get("command", "")
+    ]
+    if not remaining:
+        return None
+    group["hooks"] = remaining
+    return group
+
+
 def merge_settings(claude_dir: Path) -> None:
     settings_path = claude_dir / "settings.json"
     original = settings_path.read_text(encoding="utf-8") if settings_path.exists() else ""
@@ -53,6 +66,14 @@ def merge_settings(claude_dir: Path) -> None:
                 }
             ],
         },
+        "PostToolUse": {
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": f"python3 {hooks_dir / 'handoff-context-watch.py'}",
+                }
+            ],
+        },
         "UserPromptSubmit": {
             "hooks": [
                 {
@@ -64,6 +85,15 @@ def merge_settings(claude_dir: Path) -> None:
     }
 
     hooks = data.setdefault("hooks", {})
+    for event in list(hooks):
+        if event in ours:
+            continue
+        kept = [g for g in (_strip_ours(g) for g in hooks[event]) if g]
+        if kept:
+            hooks[event] = kept
+        else:
+            del hooks[event]  # e.g. the old UserPromptSubmit entry
+
     for event, entry in ours.items():
         kept = []
         for group in hooks.get(event, []):
@@ -77,6 +107,9 @@ def merge_settings(claude_dir: Path) -> None:
                 kept.append(group)
         kept.append(entry)
         hooks[event] = kept
+
+    # Compact early and on its own, so long jobs never stop for /clear.
+    data.setdefault("env", {}).setdefault("CLAUDE_CODE_AUTO_COMPACT_WINDOW", AUTO_COMPACT_WINDOW)
 
     new = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     if new != original:
